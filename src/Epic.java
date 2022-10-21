@@ -1,29 +1,29 @@
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task {
-    private HashMap<Integer, Subtask> listOfSubtasks = new HashMap<>();
+    private List<Subtask> listOfSubtasks = new ArrayList<>();
 
-    public HashMap<Integer, Subtask> getListOfSubtasks() {
+    public List<Subtask> getListOfSubtasks() {
         return listOfSubtasks;
     }
 
-    public void setListOfSubtasks(int idSearch, Subtask obj) {
-        listOfSubtasks.put(idSearch, obj);
+    public void setListOfSubtasks(Subtask subtask) {
+        listOfSubtasks.add(subtask);
     }
 
     public void clearListOfSubtasks() {
         listOfSubtasks.clear();
     }
 
-    public void removeListOfSubtasks(int idSearch){
-        listOfSubtasks.remove(idSearch);
+    public void removeListOfSubtasks(Subtask subtask) {
+        listOfSubtasks.remove(subtask);
     }
 
     @Override
     public String toString() {
-        return title + " {" + listOfSubtasks.values() +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
+        return "{title='" + title + "', listOfSubtasks='" + listOfSubtasks.toString() +
+                "', " + "description='" + description + '\'' +
                 ", id=" + id +
                 ", status='" + status + '\'' +
                 '}';
