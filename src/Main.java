@@ -6,9 +6,9 @@ public class Main {
 
 
         System.out.println("Тест содания задач:");
-        Task task0 = (Task) manager.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
-        Task task1 = (Task) manager.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
-        Task task2 = (Task) manager.createTask("Создать задачу №2", "Реализация функции менеджера по созданию задачи", "NEW");
+        Task task0 = manager.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
+        Task task1 = manager.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
+        Task task2 = manager.createTask("Создать задачу №2", "Реализация функции менеджера по созданию задачи", "NEW");
         System.out.println(manager.getTask());
 
         System.out.println();
@@ -28,9 +28,9 @@ public class Main {
 
         System.out.println();
         System.out.println("Тест создания Epic-задачи:");
-        Epic epic0 = (Epic) manager.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
-        Epic epic1 = (Epic) manager.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
-        Epic epic2 = (Epic) manager.createEpic("Создание эпик-задачи №2", "Тест реализации функции создания", "NEW");
+        Epic epic0 = manager.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
+        Epic epic1 = manager.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
+        Epic epic2 = manager.createEpic("Создание эпик-задачи №2", "Тест реализации функции создания", "NEW");
         System.out.println(manager.getEpic());
         manager.getListAllSubtask(epic0.getId());
 
@@ -45,9 +45,9 @@ public class Main {
 
         System.out.println();
         System.out.println("Тест создания Subtask-задачи:");
-        Subtask subtask0 = (Subtask) manager.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "NEW");
-        Subtask subtask1 = (Subtask) manager.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "NEW");
-        Subtask subtask2 = (Subtask) manager.createSubtask(epic1.getId(), "Подзадача 1-2", "Это 1-я подзадача эпика №2", "NEW");
+        Subtask subtask0 = manager.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "NEW");
+        Subtask subtask1 = manager.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "NEW");
+        Subtask subtask2 = manager.createSubtask(epic1.getId(), "Подзадача 1-2", "Это 1-я подзадача эпика №2", "NEW");
         System.out.println(manager.getSubtask());
 
         System.out.println();
