@@ -1,31 +1,34 @@
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Manager {
-    HashMap<Integer , Task> mapTask = new HashMap<>();
-    HashMap<Integer, Epic> mapEpic = new HashMap<>();
-    HashMap<Integer, Subtask> mapSubtask = new HashMap<>();
+    List<Task> listTask = new ArrayList<>();
+    List<Epic> listEpic = new ArrayList<>();
+    List<Subtask> listSubtask = new ArrayList<>();
 
     private int idTask = 0;
     private int idEpic = 0;
     private int idSubtask = 0;
 
-    public HashMap<Integer, Task> getTask() {
-        return mapTask;
+    public List<Task> getTask() {
+        return listTask;
     }
 
-    public HashMap<Integer, Epic> getEpic() {
-        return mapEpic;
+    public List<Epic> getEpic() {
+        return listEpic;
     }
 
-    public HashMap<Integer, Subtask> getSubtask() {
-        return mapSubtask;
+    public List<Subtask> getSubtask() {
+        return listSubtask;
     }
 
-    public HashMap<Integer, Subtask> getListAllSubtask(int idSearch) {
-        if ((mapEpic.containsKey(idSearch)) && (mapEpic.get(idSearch).getListOfSubtasks().size() != 0)) {
-            return mapEpic.get(idSearch).getListOfSubtasks();
-        } else {
-            System.out.println("У данной epic-задачи отсутствуют подзадачи.");
+    public List<Subtask> getListAllSubtask(int idSearch) {
+        for (Epic epic : listEpic) {
+            if (epic.id == idSearch) {
+                return epic.getListOfSubtasks();
+            } else {
+                System.out.println("У данной epic-задачи отсутствуют подзадачи.");
+            }
         }
         return null;
     }
@@ -33,157 +36,163 @@ public class Manager {
     public void removeTask(String typeTask) {
         switch (typeTask) {
             case "task":
-                mapTask.clear();
+                listTask.clear();
                 break;
             case "epic":
-                for (int idSearch : mapEpic.keySet()) {
-                    Epic obj = mapEpic.get(idSearch);
-                    for (int idSubtask : obj.getListOfSubtasks().keySet())
-                        mapSubtask.remove(obj.getListOfSubtasks().get(idSearch).getId());
+                for (Epic epic : listEpic) {
+                    for (Subtask subtask : epic.getListOfSubtasks()) {
+                        listSubtask.remove(subtask);
+                    }
                 }
-                mapEpic.clear();
+                listEpic.clear();
                 break;
             case "subtask":
-                for (int idSearch : mapSubtask.keySet()) {
-                    Subtask obj = mapSubtask.get(idSearch);
-                    mapEpic.get(obj.getIdEpic()).clearListOfSubtasks();
+                for (Subtask subtask : listSubtask) {
+                    for (Epic epic : listEpic) {
+                        if (epic.getListOfSubtasks().contains(subtask)) {
+                            epic.removeListOfSubtasks(subtask);
+                        }
+                    }
                 }
-                mapSubtask.clear();
+                listSubtask.clear();
                 break;
         }
         System.out.println("Все задачи удалены.");
     }
 
-    public Object getTaskId(int idSearch) {
-        Task obj = new Task();
-        if (mapTask.containsKey(idSearch)) {
-            obj = mapTask.get(idSearch);
-        } else {
-            System.out.println("Такого id задачи не существует.");
+    public Task getTaskId(int idSearch) {
+        for (Task task : listTask) {
+            if (task.getId() == idSearch) {
+                return task;
+            }
         }
-        return obj;
+        return null;
     }
 
-    public Object getEpicId(int idSearch) {
-        Epic obj = new Epic();
-        if (mapEpic.containsKey(idSearch)) {
-            obj = mapEpic.get(idSearch);
-        } else {
-            System.out.println("Такого id задачи не существует.");
+    public Epic getEpicId(int idSearch) {
+        for (Epic epic : listEpic) {
+            if (epic.getId() == idSearch) {
+                return epic;
+            }
         }
-        return obj;
+        return null;
     }
 
-    public Object getSubtaskId(int idSearch) {
-        Subtask obj = new Subtask();
-        if (mapSubtask.containsKey(idSearch)) {
-            obj = mapSubtask.get(idSearch);
-        } else {
-            System.out.println("Такого id задачи не существует.");
+    public Subtask getSubtaskId(int idSearch) {
+        for (Subtask subtask : listSubtask) {
+            if (subtask.getId() == idSearch) {
+                return subtask;
+            }
         }
-        return obj;
+        return null;
     }
 
-    public Object createTask(String title, String description, String status) {
-        Task obj = new Task();
-        obj.setTitle(title);
-        obj.setDescription(description);
-        obj.setStatus(status);
-        obj.setId(generatorId("task"));
-        mapTask.put(obj.getId(), obj);
-        return mapTask.get(obj.getId());
+    public Task createTask(String title, String description, String status) {
+        Task task = new Task();
+        task.setTitle(title);
+        task.setDescription(description);
+        task.setStatus(status);
+        task.setId(generatorId("task"));
+        listTask.add(task);
+        return task;
     }
 
-    public Object createEpic(String title, String description, String status) {
-        Epic obj = new Epic();
-        obj.setTitle(title);
-        obj.setDescription(description);
-        obj.setStatus(status);
-        obj.setId(generatorId("epic"));
-        mapEpic.put(obj.getId(), obj);
-        return mapEpic.get(obj.getId());
+    public Epic createEpic(String title, String description, String status) {
+        Epic epic = new Epic();
+        epic.setTitle(title);
+        epic.setDescription(description);
+        epic.setStatus(status);
+        epic.setId(generatorId("epic"));
+        listEpic.add(epic);
+        return epic;
     }
 
-    public Object createSubtask(int idSearch, String title, String description, String status) {
-        if (mapEpic.containsKey(idSearch)) {
-            Subtask obj = new Subtask();
-            obj.setTitle(title);
-            obj.setDescription(description);
-            obj.setStatus(status);
-            obj.setId(generatorId("subtask"));
-            obj.setIdEpic(idSearch);
-            mapSubtask.put(obj.getId(), obj);
-            mapEpic.get(idSearch).setListOfSubtasks(obj.getId(), obj);
-            generatorStatusEpic(idSearch);
-            return mapSubtask.get(obj.getId());
-        } else {
-            System.out.println("Выбранной epic-задачи не существует.");
+    public Subtask createSubtask(int idSearch, String title, String description, String status) {
+        for (Epic epic : listEpic) {
+            if (epic.getId() == idSearch) {
+                Subtask subtask = new Subtask();
+                subtask.setTitle(title);
+                subtask.setDescription(description);
+                subtask.setStatus(status);
+                subtask.setId(generatorId("subtask"));
+                subtask.setIdEpic(idSearch);
+                listSubtask.add(subtask);
+                epic.setListOfSubtasks(subtask);
+                generatorStatusEpic(idSearch);
+                return subtask;
+            }
         }
         return null;
     }
 
     public void updateTask(int idSearch, String title, String description, String status) {
-        if (mapTask.containsKey(idSearch)) {
-            Task obj = mapTask.get(idSearch);
-            obj.setTitle(title);
-            obj.setDescription(description);
-            obj.setStatus(status);
-        } else {
-            System.out.println("Такого id задачи не существует.");
+        for (Task task : listTask) {
+            if (task.getId() == idSearch) {
+                task.setTitle(title);
+                task.setDescription(description);
+                task.setStatus(status);
+            }
         }
     }
 
     public void updateEpic(int idSearch, String title, String description) {
-        if (mapEpic.containsKey(idSearch)) {
-            Epic obj = mapEpic.get(idSearch);
-            obj.setTitle(title);
-            obj.setDescription(description);
-            generatorStatusEpic(idSearch);
-        } else {
-            System.out.println("Такого id задачи не существует.");
+        for (Epic epic : listEpic) {
+            if (epic.getId() == idSearch) {
+                epic.setTitle(title);
+                epic.setDescription(description);
+                generatorStatusEpic(idSearch);
+            }
         }
     }
 
     public void updateSubtask(int idSearchEpic, int idSearch, String title, String description, String status) {
-        if (mapEpic.containsKey(idSearchEpic)) {
-            if (mapSubtask.containsKey(idSearch)) {
-                Subtask obj = mapSubtask.get(idSearch);
-                obj.setTitle(title);
-                obj.setDescription(description);
-                obj.setStatus(status);
-                generatorStatusEpic(idSearchEpic);
-                mapEpic.get(idSearchEpic).setListOfSubtasks(obj.getId(), obj);
+        for (Epic epic : listEpic) {
+            if (epic.getId() == idSearchEpic) {
+                for (Subtask subtask : epic.getListOfSubtasks()) {
+                    if (subtask.getId() == idSearch) {
+                        subtask.setTitle(title);
+                        subtask.setDescription(description);
+                        subtask.setStatus(status);
+                        generatorStatusEpic(idSearchEpic);
+                        return;
+                    }
+                }
             }
-        } else {
-            System.out.println("Такого id задачи не существует.");
         }
     }
 
     public void removeTaskId(String typeTask, int idSearch) {
         switch (typeTask) {
             case "task":
-                if (mapTask.containsKey(idSearch)) {
-                    mapTask.remove(idSearch);
-                } else {
-                    System.out.println("Такого id задачи не существует.");
+                for (Task task : listTask) {
+                    if (task.getId() == idSearch) {
+                        listTask.remove(task);
+                        return;
+                    }
                 }
                 break;
             case "epic":
-                if (mapEpic.containsKey(idSearch)) {
-                    for(int idSearchSubtask : mapEpic.get(idSearch).getListOfSubtasks().keySet()){
-                        mapSubtask.remove(mapEpic.get(idSearch).getListOfSubtasks().get(idSearchSubtask).getId());
+                for (Epic epic : listEpic) {
+                    if (epic.getId() == idSearch) {
+                        if (epic.getListOfSubtasks().size() != 0) {
+                            for (Subtask subtask : epic.getListOfSubtasks()) {
+                                listSubtask.remove(subtask);
+                            }
+                        }
+                        listEpic.remove(epic);
+                        return;
                     }
-                    mapEpic.remove(idSearch);
-                } else {
-                    System.out.println("Такого id задачи не существует.");
                 }
                 break;
             case "subtask":
-                if (mapSubtask.containsKey(idSearch)) {
-                    mapEpic.get(mapSubtask.get(idSearch).getIdEpic()).removeListOfSubtasks(idSearch);
-                    mapSubtask.remove(idSearch);
-                } else {
-                    System.out.println("Такого id задачи не существует.");
+                for (Subtask subtask : listSubtask) {
+                    if (subtask.getId() == idSearch) {
+                        for (Epic epic : listEpic) {
+                            epic.removeListOfSubtasks(subtask);
+                        }
+                        listSubtask.remove(subtask);
+                        return;
+                    }
                 }
                 break;
         }
@@ -210,25 +219,32 @@ public class Manager {
     }
 
     public void generatorStatusEpic(int idSearch) {
-        boolean conditionOne = mapEpic.get(idSearch).getListOfSubtasks().size() == 0;
+        boolean conditionOne = false;
         boolean conditionTwo = false;
         boolean conditionThree = false;
 
-        for (int idSubtask : mapEpic.get(idSearch).getListOfSubtasks().keySet()) {
-            conditionTwo = mapEpic.get(idSearch).getListOfSubtasks().get(idSubtask).status.equals("NEW");
-        }
+        for (Epic epic : listEpic) {
+            if (epic.getId() == idSearch) {
+                conditionOne = epic.getListOfSubtasks().size() == 0;
+                for (Subtask subtask : epic.getListOfSubtasks()) {
+                    conditionTwo = subtask.getStatus().equals("NEW");
+                    conditionThree = subtask.getStatus().equals("DONE");
+                }
+            }
 
-        for (int idSubtask : mapEpic.get(idSearch).getListOfSubtasks().keySet()) {
-            conditionThree = mapEpic.get(idSearch).getListOfSubtasks().get(idSubtask).status.equals("DONE");
+            if (conditionOne || conditionTwo) {
+                if (epic.getId() == idSearch) {
+                    epic.setStatus("NEW");
+                }
+            } else if (conditionThree) {
+                if (epic.getId() == idSearch) {
+                    epic.setStatus("DONE");
+                }
+            } else {
+                if (epic.getId() == idSearch) {
+                    epic.setStatus("IN_PROGRESS");
+                }
+            }
         }
-
-        if (conditionOne || conditionTwo) {
-            mapEpic.get(idSearch).status = "NEW";
-        } else if (conditionThree) {
-            mapEpic.get(idSearch).status = "DONE";
-        } else {
-            mapEpic.get(idSearch).status = "IN_PROGRESS";
-        }
-
     }
 }
