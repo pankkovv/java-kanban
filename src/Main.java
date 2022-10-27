@@ -2,7 +2,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Manager manager = new Manager();
+        TaskManager manager = Managers.getDefault();
 
 
         System.out.println("Тест содания задач:");
@@ -17,7 +17,7 @@ public class Main {
 
         System.out.println();
         System.out.println("Удаление по id:");
-        manager.removeTaskId("task", task1.getId());
+        manager.removeTaskId(task1.getId());
         System.out.println(manager.getTask());
 
         System.out.println();
@@ -40,7 +40,7 @@ public class Main {
 
         System.out.println();
         System.out.println("Удаление Epic-задачи по id:");
-        manager.removeTaskId("epic", epic2.getId());
+        manager.removeEpicId(epic2.getId());
         System.out.println(manager.getEpic());
 
         System.out.println();
@@ -58,7 +58,7 @@ public class Main {
         System.out.println("Удаление Subtask-задачи:");
         System.out.println(manager.getSubtask());
         System.out.println();
-        manager.removeTaskId("subtask", subtask2.getId());
+        manager.removeSubtaskId(subtask2.getId());
         System.out.println(manager.getSubtask());
         System.out.println();
         System.out.println(manager.getEpic());
@@ -80,6 +80,20 @@ public class Main {
         manager.updateEpic(epic1.getId(), "Обновленная epic-задача", "Тест функции обновления epic-задачи");
         System.out.println(manager.getTask());
         System.out.println(manager.getEpic());
+
+        System.out.println();
+        System.out.println("Тест просмотра истории:");
+//        manager.getTaskId(task0.getId());
+//        manager.getTaskId(task0.getId());
+//        manager.getTaskId(task0.getId());
+//        manager.getTaskId(task0.getId());
+//        manager.getTaskId(task0.getId());
+//        manager.getTaskId(task0.getId());
+//        manager.getTaskId(task0.getId());
+//        manager.getTaskId(task0.getId());
+//        manager.getTaskId(task0.getId());
+
+        System.out.println(manager.getHistory());
 
     }
 }
