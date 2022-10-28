@@ -11,7 +11,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory(){
-        if(listHistory.size() != 0) {
+        if(!listHistory.isEmpty()) {
             for (int i = 0; i < listHistory.size(); i++){
                 if (listHistory.size() < 10) {
                     return listHistory;
@@ -22,6 +22,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         } else {
             System.out.println("Вы не просматривали определенные задачи. История пуста.");
         }
-        return null;
+        return List.of();
     }
 }
