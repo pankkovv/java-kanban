@@ -8,12 +8,6 @@ public class InMemoryTaskManager implements TaskManager {
     List<Epic> listEpic = new ArrayList<>();
     List<Subtask> listSubtask = new ArrayList<>();
 
-    enum StatusOfTask {
-        NEW,
-        IN_PROGRESS,
-        DONE
-    }
-
     private int idTask = 0;
     private int idEpic = 0;
     private int idSubtask = 0;
