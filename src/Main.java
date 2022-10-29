@@ -1,3 +1,9 @@
+import manager.Managers;
+import manager.TaskManager;
+import model.Epic;
+import model.Subtask;
+import model.Task;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -27,7 +33,7 @@ public class Main {
 //        System.out.println(manager.getTask());
 
         System.out.println();
-        System.out.println("Тест создания Epic-задачи:");
+        System.out.println("Тест создания task.Epic-задачи:");
         Epic epic0 = manager.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
         Epic epic1 = manager.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
         Epic epic2 = manager.createEpic("Создание эпик-задачи №2", "Тест реализации функции создания", "NEW");
@@ -35,27 +41,27 @@ public class Main {
         manager.getListAllSubtask(epic0.getId());
 
         System.out.println();
-        System.out.println("Получение Epic-задачи по id:");
+        System.out.println("Получение task.Epic-задачи по id:");
         System.out.println(manager.getEpicId(epic1.getId()));
 
         System.out.println();
-        System.out.println("Удаление Epic-задачи по id:");
+        System.out.println("Удаление task.Epic-задачи по id:");
         manager.removeEpicId(epic2.getId());
         System.out.println(manager.getEpic());
 
         System.out.println();
-        System.out.println("Тест создания Subtask-задачи:");
+        System.out.println("Тест создания task.Subtask-задачи:");
         Subtask subtask0 = manager.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "NEW");
         Subtask subtask1 = manager.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "NEW");
         Subtask subtask2 = manager.createSubtask(epic1.getId(), "Подзадача 1-2", "Это 1-я подзадача эпика №2", "NEW");
         System.out.println(manager.getSubtask());
 
         System.out.println();
-        System.out.println("Получение списка всех Subtask-задач определенного эпика:");
+        System.out.println("Получение списка всех task.Subtask-задач определенного эпика:");
         System.out.println(manager.getListAllSubtask(epic0.getId()));
 
         System.out.println();
-        System.out.println("Удаление Subtask-задачи:");
+        System.out.println("Удаление task.Subtask-задачи:");
         System.out.println(manager.getSubtask());
         System.out.println();
         manager.removeSubtaskId(subtask2.getId());
