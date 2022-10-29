@@ -1,3 +1,10 @@
+package manager;
+
+import model.Epic;
+import model.StatusOfTask;
+import model.Subtask;
+import model.Task;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +37,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Subtask> getListAllSubtask(int idSearch) {
         for (Epic epic : listEpic) {
-            if (epic.id == idSearch) {
+            if (epic.getId() == idSearch) {
                 return epic.getListOfSubtasks();
             } else {
                 System.out.println("У данной epic-задачи отсутствуют подзадачи.");
@@ -108,7 +115,7 @@ public class InMemoryTaskManager implements TaskManager {
         task.setTitle(title);
         task.setDescription(description);
         task.setStatus(status);
-        task.setId(generatorId("task"));
+        task.setId(generatorId("model"));
         listTask.add(task);
         return task;
     }
@@ -225,7 +232,7 @@ public class InMemoryTaskManager implements TaskManager {
         int id = 0;
 
         switch (typeTask) {
-            case "task":
+            case "model":
                 id = idTask;
                 ++idTask;
                 break;
