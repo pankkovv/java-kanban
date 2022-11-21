@@ -230,6 +230,7 @@ public class InMemoryTaskManager implements TaskManager {
                 for (Epic epic : listEpic) {
                     epic.removeListOfSubtasks(subtask);
                 }
+                generatorStatusEpic(subtask.getIdEpic());
                 managerHistory.remove(subtask.getId());
                 listSubtask.remove(subtask);
                 return;
