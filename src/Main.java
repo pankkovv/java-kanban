@@ -52,8 +52,8 @@ public class Main {
 //
         System.out.println();
         System.out.println("Тест создания task.Subtask-задачи:");
-        Subtask subtask0 = manager.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "NEW");
-        Subtask subtask1 = manager.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "NEW");
+        Subtask subtask0 = manager.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "DONE");
+        Subtask subtask1 = manager.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "DONE");
         Subtask subtask2 = manager.createSubtask(epic0.getId(), "Подзадача 3", "Это 3-я подзадача эпика №1", "NEW");
         Subtask subtask3 = manager.createSubtask(epic1.getId(), "Подзадача 1-2", "Это 1-я подзадача эпика №2", "NEW");
 //        System.out.println(manager.getSubtask());
@@ -111,7 +111,7 @@ public class Main {
         manager.getEpicId(epic1.getId());
         manager.getEpicId(epic2.getId());
 ////        manager.removeEpicId(epic0.getId());
-////        manager.removeSubtask();
+////        manager.removeSubtaskId(subtask2.getId());
         System.out.println(manager.getHistory());
 
 
