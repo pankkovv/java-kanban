@@ -24,14 +24,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public List<Task> getHistory(){
         if(linkedListHistory.getSize() != 0) {
-            linkedListHistory.getTasks();
-            for (int i = 0; i < listHistory.size(); i++){
-                if (listHistory.size() < 10) {
-                    return listHistory;
-                } else {
-                    listHistory.remove(0);
-                }
-            }
+            listHistory = linkedListHistory.getTasks();
+            return listHistory;
         } else {
             System.out.println("Вы не просматривали определенные задачи. История пуста.");
         }
@@ -65,10 +59,12 @@ public class InMemoryHistoryManager implements HistoryManager {
                 oldTail.next = newNode;
             size++;
         }
-        void getTasks(){
+        List<Task> getTasks(){
+            List<Task> newListHistory = new ArrayList<>();
             for (Node<Task> x = head; x != null; x = x.next) {
-                    listHistory.add((model.Task) x.data);
+                newListHistory.add(x.data);
             }
+            return newListHistory;
         }
 
         void removeNode(Node<Task> x){
