@@ -26,8 +26,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         if(linkedListHistory.getSize() != 0) {
             listHistory = linkedListHistory.getTasks();
             return listHistory;
-        } else {
-            System.out.println("Вы не просматривали определенные задачи. История пуста.");
         }
         return List.of();
     }
