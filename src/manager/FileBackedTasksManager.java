@@ -144,10 +144,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
         for(int i = 0; i < manager.getHistory().size(); i++){
             Task task = manager.getHistory().get(i);
             formatWrite.append(Integer.toString(task.getId()) + ",");
-            if(i == manager.getHistory().size()-1){
-                formatWrite.append(Integer.toString(task.getId()));
-            }
         }
+        formatWrite.deleteCharAt(formatWrite.length()-1);
         return formatWrite.toString();
     }
 
@@ -244,6 +242,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
         managerTaskToFile.getEpicId(epic1.getId());
         managerTaskToFile.getEpicId(epic2.getId());
         managerTaskToFile.getEpicId(epic0.getId());
+        managerTaskToFile.getSubtaskId(subtask1.getId());
         managerTaskToFile.getHistory();
 
         System.out.println("Загрузка данных из файла");
