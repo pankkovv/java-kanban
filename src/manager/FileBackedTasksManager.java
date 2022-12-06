@@ -21,7 +21,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
     public FileBackedTasksManager (){}
 
     public FileBackedTasksManager (String fileName){
-        this.fileManager = Paths.get("resources", fileName);
+        this.fileManager = Paths.get(fileName);
     }
 
     @Override
@@ -106,15 +106,18 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
     }
 
     public String taskToString(Task task){
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n" , task.getId(), String.valueOf(TypeTask.TASK), task.getTitle(), task.getStatus(), task.getDescription(), task.getTitle());
+        String type = TypeTask.TASK.toString();
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n" , task.getId(), type, task.getTitle(), task.getStatus(), task.getDescription(), task.getTitle());
         return formatWrite;
     }
     public String epicToString(Epic epic){
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n" , epic.getId(), String.valueOf(TypeTask.EPIC), epic.getTitle(), epic.getStatus(), epic.getDescription(), epic.getTitle());
+        String type = TypeTask.EPIC.toString();
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n" , epic.getId(), type, epic.getTitle(), epic.getStatus(), epic.getDescription(), epic.getTitle());
         return formatWrite;
     }
     public String subtaskToString(Subtask subtask){
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n" , subtask.getId(), String.valueOf(TypeTask.SUB), subtask.getTitle(), subtask.getStatus(), subtask.getDescription(), subtask.getIdEpic());
+        String type = TypeTask.SUB.toString();
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n" , subtask.getId(), type, subtask.getTitle(), subtask.getStatus(), subtask.getDescription(), subtask.getIdEpic());
         return formatWrite;
     }
 
@@ -159,28 +162,25 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
 
     public void save() {
         try (Writer fileWriter = new FileWriter(String.valueOf(fileManager))){
-            if(Files.exists(Paths.get(String.valueOf(fileManager)))){
-                String csvFormat = ("id,type,name,status,description,epic" + System.lineSeparator());
-                fileWriter.write(csvFormat);
-                for(Task task : super.getTask()){
-                    fileWriter.write(taskToString(task));
-                }
-                for(Epic epic : super.getEpic()){
-                    fileWriter.write(epicToString(epic));
-                }
-                for(Subtask subtask : super.getSubtask()){
-                    fileWriter.write(subtaskToString(subtask));
-                }
-                if(!managerHistory.getHistory().isEmpty()) {
-                    fileWriter.write(historyToString(super.managerHistory));
-                }
-            } else {
-               throw new ManagerSaveException("Файл отсутствует, данные не сохранены.");
+            String csvFormat = ("id,type,name,status,description,epic" + System.lineSeparator());
+            fileWriter.write(csvFormat);
+            for(Task task : super.getTask()){
+                fileWriter.write(taskToString(task));
+            }
+            for(Epic epic : super.getEpic()){
+                fileWriter.write(epicToString(epic));
+            }
+            for(Subtask subtask : super.getSubtask()){
+                fileWriter.write(subtaskToString(subtask));
+            }
+            if(!managerHistory.getHistory().isEmpty()) {
+                fileWriter.write(historyToString(super.managerHistory));
+            }
+            if(!Files.exists(Paths.get(String.valueOf(fileManager)))) {
+                throw new ManagerSaveException("Файл отсутствует, данные не сохранены.");
             }
         } catch (IOException e){
-            System.out.println("Возникла ошибка!" + e.getMessage());
-        } catch (ManagerSaveException e){
-            System.out.println(e.getMessage());
+            throw new ManagerSaveException(e.getMessage());
         }
     }
 
@@ -201,33 +201,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
 
             List<Integer> backupHistory = backupManager.historyFromString(backupTask[backupTask.length - 1]);
             for(Integer id : backupHistory){
-                if(id >= 0 && id < 100){
-                    for(Task task : backupManager.getTask()){
-                        if(id == task.getId()){
-                            backupManager.managerHistory.add(task);
-                        }
-                    }
-                } else if(id >= 100 && id < 200){
-                    for(Epic epic : backupManager.getEpic()){
-                        if(id == epic.getId()){
-                            backupManager.managerHistory.add(epic);
-                        }
-                    }
-                } else if(id >= 200 ){
-                    for(Subtask subtask : backupManager.getSubtask()){
-                        if(id == subtask.getId()){
-                            backupManager.managerHistory.add(subtask);
-                        }
-                    }
-                }
+               if(backupManager.getTaskId(id) != null){
+                   backupManager.managerHistory.add(backupManager.getTaskId(id));
+               } else if(backupManager.getEpicId(id) != null){
+                   backupManager.managerHistory.add(backupManager.getEpicId(id));
+               } else if(backupManager.getSubtaskId(id) != null){
+                   backupManager.managerHistory.add(backupManager.getSubtaskId(id));
+               }
             }
         } catch (IOException e){
-            System.out.println("Возникла ошибка!");
+            throw new ManagerSaveException(e.getMessage());
         }
         return backupManager;
     }
 
-    public static class ManagerSaveException extends Exception{
+    public static class ManagerSaveException extends RuntimeException{
         public ManagerSaveException(){}
         public ManagerSaveException(final String message){
             super(message);
@@ -259,7 +247,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
         managerTaskToFile.getHistory();
 
         System.out.println("Загрузка данных из файла");
-        Path backupFile = Paths.get("resources", "autosave.csv");
+        Path backupFile = Paths.get("autosave.csv");
         FileBackedTasksManager managerTaskFromFile = loadFromFile(backupFile.toFile());
 
         System.out.println(managerTaskFromFile.getTask());
