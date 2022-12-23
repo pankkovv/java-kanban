@@ -1,12 +1,15 @@
 package manager;
 
-import model.Epic;
-import model.StatusOfTask;
-import model.Subtask;
-import model.Task;
+import model.*;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.TreeSet;
 
-import java.util.ArrayList;
-import java.util.List;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -48,7 +51,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTask() {
-        for(Task task : listTask){
+        for (Task task : listTask) {
             managerHistory.remove(task.getId());
         }
         listTask.clear();
@@ -71,12 +74,12 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeSubtask() {
         for (Subtask subtask : listSubtask) {
+            managerHistory.remove(subtask.getId());
             for (Epic epic : listEpic) {
                 if (epic.getListOfSubtasks().contains(subtask)) {
                     epic.removeListOfSubtasks(subtask);
                 }
             }
-            managerHistory.remove(subtask.getId());
         }
         listSubtask.clear();
         System.out.println("Все subtask-задачи удалены.");
@@ -121,7 +124,12 @@ public class InMemoryTaskManager implements TaskManager {
         task.setTitle(title);
         task.setDescription(description);
         task.setStatus(status);
-        task.setId(generatorId("model"));
+        task.setId(generatorId(TypeTask.TASK.toString()));
+        task.setStartTime(LocalDateTime.now());
+        if (task.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+            task.setDuration(Duration.between(task.getStartTime(), LocalDateTime.now()));
+            task.setEndTime(task.getStartTime().plus(task.getDuration()));
+        }
         listTask.add(task);
         return task;
     }
@@ -132,7 +140,23 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setTitle(title);
         epic.setDescription(description);
         epic.setStatus(status);
-        epic.setId(generatorId("epic"));
+        epic.setId(generatorId(TypeTask.EPIC.toString()));
+        if (epic.getListOfSubtasks().size() != 0) {
+            LocalDateTime startTime = LocalDateTime.of(2000, 1, 1, 0, 0, 0);
+            for (Subtask subtask : epic.getListOfSubtasks()) {
+                if (subtask.getStartTime().isAfter(startTime)) {
+                    startTime = subtask.getStartTime();
+                }
+            }
+            epic.setStartTime(startTime);
+        } else {
+            epic.setStartTime(null);
+        }
+        if (epic.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+            epic.setStartTime(LocalDateTime.now());
+            epic.setDuration(Duration.between(epic.getStartTime(), LocalDateTime.now()));
+            epic.setEndTime(epic.getStartTime().plus(epic.getDuration()));
+        }
         listEpic.add(epic);
         return epic;
     }
@@ -145,11 +169,28 @@ public class InMemoryTaskManager implements TaskManager {
                 subtask.setTitle(title);
                 subtask.setDescription(description);
                 subtask.setStatus(status);
-                subtask.setId(generatorId("subtask"));
+                subtask.setId(generatorId(TypeTask.SUB.toString()));
                 subtask.setIdEpic(idSearch);
+                subtask.setStartTime(LocalDateTime.now());
+                if (subtask.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+                    subtask.setDuration(Duration.between(subtask.getStartTime(), LocalDateTime.now()));
+                    subtask.setEndTime(subtask.getStartTime().plus(subtask.getDuration()));
+                }
                 listSubtask.add(subtask);
                 epic.setListOfSubtasks(subtask);
                 generatorStatusEpic(idSearch);
+                if (epic.getListOfSubtasks().size() != 0) {
+                    LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
+                    for (Subtask sub : epic.getListOfSubtasks()) {
+                        if (sub.getStartTime().isBefore(startTime)) {
+                            startTime = sub.getStartTime();
+                        }
+                    }
+                    epic.setStartTime(startTime);
+                } else {
+                    epic.setStartTime(null);
+                }
+                getEndTimeEpic(idSearch);
                 return subtask;
             }
         }
@@ -163,6 +204,10 @@ public class InMemoryTaskManager implements TaskManager {
                 task.setTitle(title);
                 task.setDescription(description);
                 task.setStatus(status);
+                if (task.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+                    task.setDuration(Duration.between(task.getStartTime(), LocalDateTime.now()));
+                    task.setEndTime(task.getStartTime().plus(task.getDuration()));
+                }
             }
         }
     }
@@ -174,6 +219,7 @@ public class InMemoryTaskManager implements TaskManager {
                 epic.setTitle(title);
                 epic.setDescription(description);
                 generatorStatusEpic(idSearch);
+                getEndTimeEpic(idSearch);
             }
         }
     }
@@ -187,7 +233,12 @@ public class InMemoryTaskManager implements TaskManager {
                         subtask.setTitle(title);
                         subtask.setDescription(description);
                         subtask.setStatus(status);
+                        if (subtask.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+                            subtask.setDuration(Duration.between(subtask.getStartTime(), LocalDateTime.now()));
+                            subtask.setEndTime(subtask.getStartTime().plus(subtask.getDuration()));
+                        }
                         generatorStatusEpic(idSearchEpic);
+                        getEndTimeEpic(idSearchEpic);
                         return;
                     }
                 }
@@ -231,6 +282,7 @@ public class InMemoryTaskManager implements TaskManager {
                     epic.removeListOfSubtasks(subtask);
                 }
                 generatorStatusEpic(subtask.getIdEpic());
+                getEndTimeEpic(subtask.getIdEpic());
                 managerHistory.remove(subtask.getId());
                 listSubtask.remove(subtask);
                 return;
@@ -243,15 +295,15 @@ public class InMemoryTaskManager implements TaskManager {
         int id = 0;
 
         switch (typeTask) {
-            case "model":
+            case "TASK":
                 id = idTask;
                 ++idTask;
                 break;
-            case "epic":
+            case "EPIC":
                 id = idEpic;
                 ++idEpic;
                 break;
-            case "subtask":
+            case "SUB":
                 id = idSubtask;
                 ++idSubtask;
                 break;
@@ -262,37 +314,117 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void generatorStatusEpic(int idSearch) {
         boolean conditionOne = false;
-        boolean conditionTwo = false;
-        boolean conditionThree = false;
+        int conditionTwo = 0;
+        List<Integer> listTypeStatus = new ArrayList<>();
 
         for (Epic epic : listEpic) {
             if (epic.getId() == idSearch) {
                 conditionOne = epic.getListOfSubtasks().size() == 0;
+
                 for (Subtask subtask : epic.getListOfSubtasks()) {
-                    conditionTwo = subtask.getStatus().equals(String.valueOf(StatusOfTask.NEW));
-                    conditionThree = subtask.getStatus().equals(String.valueOf(StatusOfTask.DONE));
+                    if (subtask.getStatus().equals(String.valueOf(StatusOfTask.NEW))) {
+                        listTypeStatus.add(1);
+                    } else if (subtask.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+                        listTypeStatus.add(-1);
+                    } else {
+                        listTypeStatus.add(0);
+                    }
+                }
+
+                for (Integer type : listTypeStatus) {
+                    conditionTwo += type;
+                }
+
+                if (conditionOne || conditionTwo == listTypeStatus.size()) {
+                    epic.setStatus(String.valueOf(StatusOfTask.NEW));
+                } else if (conditionTwo == -listTypeStatus.size()) {
+                    epic.setStatus(String.valueOf(StatusOfTask.DONE));
+                } else {
+                    epic.setStatus(String.valueOf(StatusOfTask.IN_PROGRESS));
                 }
             }
 
-            if (conditionOne || conditionTwo) {
-                if (epic.getId() == idSearch) {
-                    epic.setStatus(String.valueOf(StatusOfTask.NEW));
+        }
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return managerHistory.getHistory();
+    }
+
+    public void getEndTimeEpic(int idSearch) {
+        LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
+        LocalDateTime endTime;
+        Duration durationEpicMoment;
+        List<Integer> listTypeStatus = new ArrayList<>();
+        Integer conditionOne = 0;
+
+        for (Epic epic : listEpic) {
+            if (epic.getId() == idSearch) {
+                for (Subtask subtask : epic.getListOfSubtasks()) {
+                    if (subtask.getStartTime().isBefore(startTime)) {
+                        startTime = subtask.getStartTime();
+                    }
+                    if (subtask.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+                        listTypeStatus.add(-1);
+                        durationEpicMoment = Duration.between(subtask.getStartTime(), subtask.getEndTime());
+                        if (epic.getDuration() == null) {
+                            epic.setDuration(durationEpicMoment);
+                        } else {
+                            epic.setDuration(epic.getDuration().plus(durationEpicMoment));
+                        }
+                    } else {
+                        listTypeStatus.add(0);
+                    }
                 }
-            } else if (conditionThree) {
-                if (epic.getId() == idSearch) {
-                    epic.setStatus(String.valueOf(StatusOfTask.DONE));
+
+                for (Integer type : listTypeStatus) {
+                    conditionOne += type;
                 }
-            } else {
-                if (epic.getId() == idSearch) {
-                    epic.setStatus(String.valueOf(StatusOfTask.IN_PROGRESS));
+
+                if (conditionOne == -listTypeStatus.size()) {
+                    if (epic.getListOfSubtasks().size() != 0) {
+                        epic.setEndTime(startTime.plus(epic.getDuration()));
+
+                    }
+                } else {
+                    epic.setEndTime(null);
                 }
             }
         }
     }
 
-    @Override
-    public List<Task> getHistory(){
-        return managerHistory.getHistory();
+    public Set<Task> getPrioritizedTasks() {
+        List<Task> tasks = new ArrayList<>();
+        tasks.addAll(listTask);
+        tasks.addAll(listSubtask);
+        try {
+            Set<Task> tasksAfterSorted = new TreeSet<>(tasks);
+
+            int countTaskInProcess = 0;
+            for (Task task : tasksAfterSorted) {
+                if (!task.getStatus().equals(StatusOfTask.DONE) && task.getEndTime() == null) {
+                    countTaskInProcess++;
+                }
+            }
+            if (countTaskInProcess != 1) {
+                throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+            }
+            for(Task t : tasksAfterSorted) {
+                System.out.println(t);
+            }
+            return tasksAfterSorted;
+        } catch (ValidationTaskException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
+    public static class ValidationTaskException extends RuntimeException{
+        public ValidationTaskException(){}
+        public ValidationTaskException(final String message){
+            super(message);
+        }
+    }
 }
+

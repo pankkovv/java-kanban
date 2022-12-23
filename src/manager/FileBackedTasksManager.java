@@ -220,40 +220,4 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
         }
     }
 
-    public static void main(String[] args) throws ManagerSaveException {
-        System.out.println("Загрузка данных в файл");
-        FileBackedTasksManager managerTaskToFile = new FileBackedTasksManager("autosave.csv");
-        Task task0 = managerTaskToFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
-        Task task1 = managerTaskToFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
-        Task task2 = managerTaskToFile.createTask("Создать задачу №2", "Реализация функции менеджера по созданию задачи", "NEW");
-        Epic epic0 = managerTaskToFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
-        Epic epic1 = managerTaskToFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
-        Epic epic2 = managerTaskToFile.createEpic("Создание эпик-задачи №2", "Тест реализации функции создания", "NEW");
-        Subtask subtask0 = managerTaskToFile.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "DONE");
-        Subtask subtask1 = managerTaskToFile.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "DONE");
-        Subtask subtask2 = managerTaskToFile.createSubtask(epic0.getId(), "Подзадача 3", "Это 3-я подзадача эпика №1", "NEW");
-        Subtask subtask3 = managerTaskToFile.createSubtask(epic1.getId(), "Подзадача 1-2", "Это 1-я подзадача эпика №2", "NEW");
-
-        managerTaskToFile.getSubtaskId(subtask0.getId());
-        managerTaskToFile.getSubtaskId(subtask1.getId());
-        managerTaskToFile.getSubtaskId(subtask2.getId());
-        managerTaskToFile.getSubtaskId(subtask3.getId());
-        managerTaskToFile.getEpicId(epic0.getId());
-        managerTaskToFile.getEpicId(epic1.getId());
-        managerTaskToFile.getEpicId(epic2.getId());
-        managerTaskToFile.getEpicId(epic0.getId());
-        managerTaskToFile.getSubtaskId(subtask1.getId());
-        managerTaskToFile.getHistory();
-
-        System.out.println("Загрузка данных из файла");
-        Path backupFile = Paths.get("autosave.csv");
-        FileBackedTasksManager managerTaskFromFile = loadFromFile(backupFile.toFile());
-
-        System.out.println(managerTaskFromFile.getTask());
-        System.out.println(managerTaskFromFile.getEpic());
-        System.out.println(managerTaskFromFile.getSubtask());
-        System.out.println(managerTaskFromFile.getHistory());
-    }
-
-
 }
