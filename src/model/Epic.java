@@ -45,7 +45,7 @@ public class Epic extends Task {
 
         Epic taskNew = (Epic) epic;
 
-        return  (id != taskNew.id) && Objects.equals(title, taskNew.title) && Objects.equals(description, taskNew.description) && Objects.equals(status, taskNew.status);
+        return  Objects.equals(title, taskNew.title) && Objects.equals(description, taskNew.description) && Objects.equals(status, taskNew.status);
     }
     @Override
     public int hashCode() {

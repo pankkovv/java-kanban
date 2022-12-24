@@ -46,7 +46,7 @@ public class Task implements Comparable<Task> {
 
         Task taskNew = (Task) task;
 
-        return  id != taskNew.getId() && Objects.equals(title, taskNew.title) && Objects.equals(description, taskNew.description) && Objects.equals(status, taskNew.status);
+        return  (id == taskNew.id) && Objects.equals(title, taskNew.title) && Objects.equals(description, taskNew.description) && Objects.equals(status, taskNew.status);
     }
     @Override
     public int hashCode() {
@@ -55,6 +55,22 @@ public class Task implements Comparable<Task> {
         return result;
     }
 
+    @Override
+    public int compareTo(Task o) {
+        if(this.getStartTime() == null && o.getStartTime() != null){
+            return Integer.compare(1, 0);
+        } else if(this.getStartTime() != null && o.getStartTime() == null){
+            return Integer.compare(0, 1);
+        } else if(this.getStartTime() == null && o.getStartTime() == null){
+            return Integer.compare(1, 0);
+        } else {
+            if(this.getStartTime().isAfter(o.getStartTime())){
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
     public String getTitle() {
         return title;
     }
@@ -109,18 +125,5 @@ public class Task implements Comparable<Task> {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
-    }
-
-    @Override
-    public int compareTo(Task o) {
-        if(this.getStartTime() == null && o.getStartTime() != null){
-            return Integer.compare(o.getStartTime().getNano(), 0);
-        } else if(this.getStartTime() != null && o.getStartTime() == null){
-            return Integer.compare(0, this.getStartTime().getNano());
-        } else if(this.getStartTime() == null && o.getStartTime() == null){
-            return Integer.compare(0, 0);
-        } else {
-            return Integer.compare(o.getStartTime().getNano(), this.getStartTime().getNano());
-        }
     }
 }

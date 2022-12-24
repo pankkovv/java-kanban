@@ -37,7 +37,7 @@ public class Subtask extends Task {
 
         Subtask subNew = (Subtask) sub;
 
-        return  (id != subNew.getId()) && Objects.equals(title, subNew.title) && Objects.equals(description, subNew.description) && Objects.equals(status, subNew.status);
+        return  Objects.equals(title, subNew.title) && Objects.equals(description, subNew.description) && Objects.equals(status, subNew.status);
     }
     @Override
     public int hashCode() {
