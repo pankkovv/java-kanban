@@ -3,11 +3,9 @@ package manager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
-import model.TypeTask;
 
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 public interface TaskManager {
 
