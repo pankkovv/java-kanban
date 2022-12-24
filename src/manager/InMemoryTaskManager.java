@@ -11,7 +11,7 @@ import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    HistoryManager managerHistory = Managers.getDefaultHistory();
+    public HistoryManager managerHistory = Managers.getDefaultHistory();
     List<Task> listTask = new ArrayList<>();
     List<Epic> listEpic = new ArrayList<>();
     List<Subtask> listSubtask = new ArrayList<>();
