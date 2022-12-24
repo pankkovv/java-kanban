@@ -3,9 +3,6 @@ package model;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.Objects;
 
 public class Task implements Comparable<Task> {
