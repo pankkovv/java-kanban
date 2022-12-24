@@ -1,9 +1,7 @@
 package manager;
 
 import model.*;
-import java.util.Comparator;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.TreeSet;
 
 
@@ -17,7 +15,7 @@ public class InMemoryTaskManager implements TaskManager {
     List<Task> listTask = new ArrayList<>();
     List<Epic> listEpic = new ArrayList<>();
     List<Subtask> listSubtask = new ArrayList<>();
-
+    Set<Task> tasksAfterSorted = new TreeSet<>();
     private int idTask = 0;
     private int idEpic = 100;
     private int idSubtask = 200;
@@ -205,6 +203,9 @@ public class InMemoryTaskManager implements TaskManager {
                 task.setDescription(description);
                 task.setStatus(status);
                 if (task.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+                    if(task.getStartTime() == null){
+                        task.setStartTime(LocalDateTime.now());
+                    }
                     task.setDuration(Duration.between(task.getStartTime(), LocalDateTime.now()));
                     task.setEndTime(task.getStartTime().plus(task.getDuration()));
                 }
@@ -234,6 +235,9 @@ public class InMemoryTaskManager implements TaskManager {
                         subtask.setDescription(description);
                         subtask.setStatus(status);
                         if (subtask.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+                            if(subtask.getStartTime() == null){
+                                subtask.setStartTime(LocalDateTime.now());
+                            }
                             subtask.setDuration(Duration.between(subtask.getStartTime(), LocalDateTime.now()));
                             subtask.setEndTime(subtask.getStartTime().plus(subtask.getDuration()));
                         }
@@ -395,25 +399,34 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public Set<Task> getPrioritizedTasks() {
-        List<Task> tasks = new ArrayList<>();
-        tasks.addAll(listTask);
-        tasks.addAll(listSubtask);
-        try {
-            Set<Task> tasksAfterSorted = new TreeSet<>(tasks);
+        int countTaskInProcess = 0;
 
-            int countTaskInProcess = 0;
+        try {
+
+            if(tasksAfterSorted.size() !=0){
+                tasksAfterSorted.clear();
+            }
+            tasksAfterSorted.addAll(listTask);
+            tasksAfterSorted.addAll(listSubtask);
+
+
             for (Task task : tasksAfterSorted) {
-                if (!task.getStatus().equals(StatusOfTask.DONE) && task.getEndTime() == null) {
+                if (task.getStatus().equals(StatusOfTask.NEW.toString())) {
+                    countTaskInProcess++;
+                } else if (task.getStatus().equals(StatusOfTask.IN_PROGRESS.toString())) {
                     countTaskInProcess++;
                 }
             }
-            if (countTaskInProcess != 1) {
+
+            if (countTaskInProcess != 0 && countTaskInProcess != 1) {
                 throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
             }
+
             for(Task t : tasksAfterSorted) {
                 System.out.println(t);
             }
             return tasksAfterSorted;
+
         } catch (ValidationTaskException e){
             System.out.println(e.getMessage());
         }
