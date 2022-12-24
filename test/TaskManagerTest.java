@@ -1,6 +1,5 @@
-package manager;
-
-import com.sun.source.tree.Tree;
+import manager.FileBackedTasksManager;
+import manager.TaskManager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -10,8 +9,6 @@ import java.util.List;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -395,15 +392,42 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     @Test
     public void getPrioritizedTasksTest(){
         Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
+        task.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 00, 00));
+
+        Task task4 = manager.createTask("Задача", "Функция создания задачи", "NEW");
+        task4.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 00, 00));
+        task4.setEndTime(task.getEndTime());
+        task4.setId(task.getId());
+
         Task task1 = manager.createTask("Задача 1", "Функция создания задачи 1", "DONE");
+        task1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 01, 00));
         Task task2 = manager.createTask("Задача 2", "Функция создания задачи 2", "DONE");
+        task2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
 
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
 
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "DONE");
+        subtask.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 03, 00));
         Subtask subtask1 = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика 1", "DONE");
+        subtask1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
         Subtask subtask2 = manager.createSubtask(epic.getId(), "Подзадача 2", "Подзадача эпика 2", "DONE");
+        subtask2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
+
         manager.getPrioritizedTasks();
+        System.out.println("");
+
+
+        manager.updateTask(task.getId(), "kfgnfkdmgkd", "dsgfshdfkjsdfjsdhjfk", "DONE");
+        manager.updateTask(task4.getId(), "kfgnfkdmgkd", "dsgfshdfkjsdfjsdhjfk", "DONE");
+        subtask1.setStartTime(null);
+        manager.getPrioritizedTasks();
+        System.out.println("");
+
+        manager.updateTask(task1.getId(), "sdhhfgksdhfidsj", "dsgfshdfkjsdfjsdhjfk", "DONE");
+        task1.setStartTime(null);
+
+        manager.getPrioritizedTasks();
+        System.out.println("");
     }
 
     //С пустым списком задач.
