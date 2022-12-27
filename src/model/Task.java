@@ -3,13 +3,15 @@ package model;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.Objects;
 
-public class Task implements Comparable<Task> {
+public class Task {
     protected String title;
     protected String description;
 
     protected Integer id;
+
     protected String status;
 
     protected LocalDateTime startTime;
@@ -52,22 +54,6 @@ public class Task implements Comparable<Task> {
         return result;
     }
 
-    @Override
-    public int compareTo(Task o) {
-        if(this.getStartTime() == null && o.getStartTime() != null){
-            return Integer.compare(1, 0);
-        } else if(this.getStartTime() != null && o.getStartTime() == null){
-            return Integer.compare(0, 1);
-        } else if(this.getStartTime() == null && o.getStartTime() == null){
-            return Integer.compare(1, 0);
-        } else {
-            if(this.getStartTime().isAfter(o.getStartTime())){
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-    }
     public String getTitle() {
         return title;
     }
