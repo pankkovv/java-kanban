@@ -1,6 +1,8 @@
 package manager;
 
 import model.*;
+
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -10,12 +12,32 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
-
     public HistoryManager managerHistory = Managers.getDefaultHistory();
+
+    Comparator<Task> comparator = (o1, o2) -> {
+
+        if (o1.getStartTime() == null && o2.getStartTime() == null) {
+            return Integer.compare(1, 0);
+        } else if (o1.getStartTime() != null && o2.getStartTime() == null) {
+            return Integer.compare(0, 1);
+        } else if (o1.getStartTime() == null && o2.getStartTime() != null) {
+            return Integer.compare(1, 0);
+        }
+
+        if (o1.getStartTime().isAfter(o2.getStartTime())) {
+            return 1;
+        } else if (o1.getStartTime().isBefore(o2.getStartTime())) {
+            return -1;
+        } else {
+            return 1;
+        }
+    };
+
     List<Task> listTask = new ArrayList<>();
     List<Epic> listEpic = new ArrayList<>();
     List<Subtask> listSubtask = new ArrayList<>();
-    Set<Task> tasksAfterSorted = new TreeSet<>();
+    public TreeSet<Task> setAfterSorted = new TreeSet<>(comparator);
+
     private int idTask = 0;
     private int idEpic = 100;
     private int idSubtask = 200;
@@ -129,6 +151,9 @@ public class InMemoryTaskManager implements TaskManager {
             task.setEndTime(task.getStartTime().plus(task.getDuration()));
         }
         listTask.add(task);
+        if(!setAfterSorted.contains(task)){
+            setAfterSorted.add(task);
+        }
         return task;
     }
 
@@ -161,6 +186,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask createSubtask(int idSearch, String title, String description, String status) {
+
         for (Epic epic : listEpic) {
             if (epic.getId() == idSearch) {
                 Subtask subtask = new Subtask();
@@ -175,6 +201,9 @@ public class InMemoryTaskManager implements TaskManager {
                     subtask.setEndTime(subtask.getStartTime().plus(subtask.getDuration()));
                 }
                 listSubtask.add(subtask);
+                if(!setAfterSorted.contains(subtask)){
+                    setAfterSorted.add(subtask);
+                }
                 epic.setListOfSubtasks(subtask);
                 generatorStatusEpic(idSearch);
                 if (epic.getListOfSubtasks().size() != 0) {
@@ -358,7 +387,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     public void getEndTimeEpic(int idSearch) {
         LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
-        LocalDateTime endTime;
         Duration durationEpicMoment;
         List<Integer> listTypeStatus = new ArrayList<>();
         Integer conditionOne = 0;
@@ -369,6 +397,7 @@ public class InMemoryTaskManager implements TaskManager {
                     if (subtask.getStartTime().isBefore(startTime)) {
                         startTime = subtask.getStartTime();
                     }
+
                     if (subtask.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
                         listTypeStatus.add(-1);
                         durationEpicMoment = Duration.between(subtask.getStartTime(), subtask.getEndTime());
@@ -389,7 +418,6 @@ public class InMemoryTaskManager implements TaskManager {
                 if (conditionOne == -listTypeStatus.size()) {
                     if (epic.getListOfSubtasks().size() != 0) {
                         epic.setEndTime(startTime.plus(epic.getDuration()));
-
                     }
                 } else {
                     epic.setEndTime(null);
@@ -398,44 +426,34 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    public Set<Task> getPrioritizedTasks() {
+    public List<Task> getPrioritizedTasks() {
         int countTaskInProcess = 0;
-
         try {
+            List<Task> listAfterSorted = new ArrayList<>();
 
-            if(tasksAfterSorted.size() !=0){
-                tasksAfterSorted.clear();
-            }
-            tasksAfterSorted.addAll(listTask);
-            tasksAfterSorted.addAll(listSubtask);
+            listAfterSorted.addAll(setAfterSorted);
 
-
-            for (Task task : tasksAfterSorted) {
-                if (task.getStatus().equals(StatusOfTask.NEW.toString())) {
-                    countTaskInProcess++;
-                } else if (task.getStatus().equals(StatusOfTask.IN_PROGRESS.toString())) {
+            for(Task task : listAfterSorted){
+                if(task.getEndTime() == null){
                     countTaskInProcess++;
                 }
             }
 
-            if (countTaskInProcess != 0 && countTaskInProcess != 1) {
+            if (countTaskInProcess > 1) {
                 throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
             }
 
-            for(Task t : tasksAfterSorted) {
-                System.out.println(t);
-            }
-            return tasksAfterSorted;
+            return listAfterSorted;
 
-        } catch (ValidationTaskException e){
+        } catch (ValidationTaskException e) {
             System.out.println(e.getMessage());
         }
         return null;
     }
 
-    public static class ValidationTaskException extends RuntimeException{
-        public ValidationTaskException(){}
-        public ValidationTaskException(final String message){
+    public static class ValidationTaskException extends RuntimeException {
+        public ValidationTaskException() {}
+        public ValidationTaskException(final String message) {
             super(message);
         }
     }
