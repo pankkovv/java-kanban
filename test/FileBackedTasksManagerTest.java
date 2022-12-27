@@ -25,8 +25,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     void taskToStringTest() {
         Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
         String type = TypeTask.TASK.toString();
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n", task.getId(), type, task.getTitle(), task.getStatus(), task.getDescription(), task.getTitle());
-        String expectedString = "0,TASK,Задача,NEW,Функция создания задачи,Задача\r\n";
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n" , task.getId(), type, task.getTitle(), task.getStatus(), task.getDescription(), task.getTitle(), task.getStartTime(), task.getDuration(), task.getEndTime());
+        String expectedString = "0,TASK,Задача,NEW,Функция создания задачи,Задача," + task.getStartTime() + "," + task.getDuration() + "," +  task.getEndTime() + "\r\n";
 
         assertEquals(expectedString, formatWrite, "Строки для записи неодинаковые.");
     }
@@ -35,8 +35,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     void epicToStringTest() {
         Epic epic = manager.createEpic("Задача", "Функция создания задачи", "NEW");
         String type = TypeTask.EPIC.toString();
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n", epic.getId(), type, epic.getTitle(), epic.getStatus(), epic.getDescription(), epic.getTitle());
-        String expectedString = "100,EPIC,Задача,NEW,Функция создания задачи,Задача\r\n";
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n", epic.getId(), type, epic.getTitle(), epic.getStatus(), epic.getDescription(), epic.getTitle(), epic.getStartTime(), epic.getDuration(), epic.getEndTime());
+        String expectedString = "100,EPIC,Задача,NEW,Функция создания задачи,Задача," + epic.getStartTime() + "," + epic.getDuration() + "," +  epic.getEndTime() + "\r\n";
 
         assertEquals(expectedString, formatWrite, "Строки для записи неодинаковые.");
     }
@@ -46,8 +46,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         Epic epic = manager.createEpic("Задача", "Функция создания задачи", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Задача", "Функция создания задачи", "NEW");
         String type = TypeTask.SUB.toString();
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n", subtask.getId(), type, subtask.getTitle(), subtask.getStatus(), subtask.getDescription(), subtask.getIdEpic());
-        String expectedString = "200,SUB,Задача,NEW,Функция создания задачи,100\r\n";
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n", subtask.getId(), type, subtask.getTitle(), subtask.getStatus(), subtask.getDescription(), subtask.getIdEpic(), subtask.getStartTime(), subtask.getDuration(), subtask.getEndTime());
+        String expectedString = "200,SUB,Задача,NEW,Функция создания задачи,100," + subtask.getStartTime() + "," + subtask.getDuration() + "," +  subtask.getEndTime() + "\r\n";
 
         assertEquals(expectedString, formatWrite, "Строки для записи неодинаковые.");
     }
@@ -188,7 +188,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     //Пустой список задач.
     @Test
     void SaveTestEmpty() {
-        FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
+        FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
         managerFile.getHistory();
         managerFile.save();
         assertTrue(Files.exists(Paths.get("test")), "Файл не создан.");
@@ -196,12 +196,12 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
     @Test
     void LoadFromFileTestEmpty() {
-        FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
+        FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
         managerFile.getHistory();
         managerFile.save();
 
         FileBackedTasksManager backupManager = new FileBackedTasksManager();
-        Path backupFile = Paths.get("test.csv");
+        Path backupFile = Paths.get("testIsEmpty.csv");
 
         assertNotNull(backupFile, "Файл не существует.");
 
@@ -239,19 +239,19 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     // Эпик без подзадач.
     @Test
     void SaveTestEpicWithoutSub() {
-        FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
+        FileBackedTasksManager managerFile = new FileBackedTasksManager("testWithoutSub.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
         Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
         Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
         managerFile.getTaskId(task0.getId());
         managerFile.getEpicId(epic0.getId());
-        assertTrue(Files.exists(Paths.get("test")), "Файл не создан.");
+        assertTrue(Files.exists(Paths.get("testWithoutSub.csv")), "Файл не создан.");
     }
 
     @Test
     void LoadFromFileTestEpicWithoutSub() {
-        FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
+        FileBackedTasksManager managerFile = new FileBackedTasksManager("testWithoutSub.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
         Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
@@ -261,7 +261,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         managerFile.getHistory();
 
         FileBackedTasksManager backupManager = new FileBackedTasksManager();
-        Path backupFile = Paths.get("test.csv");
+        Path backupFile = Paths.get("testWithoutSub.csv");
 
         assertNotNull(backupFile, "Файл не существует.");
 
@@ -299,7 +299,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     //Пустой список истории.
     @Test
     void SaveTestHistoryIsEmpty() {
-        FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
+        FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
         Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
@@ -313,7 +313,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
     @Test
     void LoadFromFileTestHistoryIsEmpty() {
-        FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
+        FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
         Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
@@ -322,7 +322,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         Subtask subtask1 = managerFile.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "DONE");
 
         FileBackedTasksManager backupManager = new FileBackedTasksManager();
-        Path backupFile = Paths.get("test.csv");
+        Path backupFile = Paths.get("testIsEmpty.csv");
 
         assertNotNull(backupFile, "Файл не существует.");
 
