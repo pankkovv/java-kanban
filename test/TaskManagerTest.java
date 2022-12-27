@@ -1,8 +1,7 @@
 import manager.FileBackedTasksManager;
+import manager.InMemoryTaskManager;
 import manager.TaskManager;
-import model.Epic;
-import model.Subtask;
-import model.Task;
+import model.*;
 
 import java.util.List;
 
@@ -101,6 +100,203 @@ public abstract class TaskManagerTest <T extends TaskManager>{
         assertNull(subtask.getEndTime(), "Время окончания посчитано не верно.");
     }
 
+    //Test getPrioritizedTasksTest method
+    @Test
+    public void getPrioritizedTasksTestNormalStartTime(){
+        InMemoryTaskManager manager = new InMemoryTaskManager();
+
+        Task task = new Task();
+        task.setTitle("Задача");
+        task.setDescription("Функция создания задачи");
+        task.setStatus("NEW");
+        task.setId(0);
+        task.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 00, 00));
+        task.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 00, 00));
+        manager.setAfterSorted.add(task);
+
+        Task task1 = new Task();
+        task1.setTitle("Задача1");
+        task1.setDescription("Функция создания задачи1");
+        task1.setStatus("NEW");
+        task1.setId(1);
+        task1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 01, 00));
+        task1.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 01, 00));
+        manager.setAfterSorted.add(task1);
+
+        Task task2 = new Task();
+        task2.setTitle("Задача2");
+        task2.setDescription("Функция создания задачи2");
+        task2.setStatus("NEW");
+        task2.setId(2);
+        task2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
+        task2.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
+        manager.setAfterSorted.add(task2);
+
+        Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
+
+        Subtask subtask = new Subtask();
+        subtask.setTitle("Подзадача");
+        subtask.setDescription("Подзадача эпика");
+        subtask.setStatus("DONE");
+        subtask.setId(200);
+        subtask.setIdEpic(epic.getId());
+        subtask.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 03, 00));
+        subtask.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 03, 00));
+        manager.setAfterSorted.add(subtask);
+
+        Subtask subtask1 = new Subtask();
+        subtask1.setTitle("Подзадача1");
+        subtask1.setDescription("Подзадача эпика1");
+        subtask1.setStatus("DONE");
+        subtask1.setId(201);
+        subtask1.setIdEpic(epic.getId());
+        subtask1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
+        subtask1.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
+        manager.setAfterSorted.add(subtask1);
+
+        Subtask subtask2 = new Subtask();
+        subtask2.setTitle("Подзадача2");
+        subtask2.setDescription("Подзадача эпика2");
+        subtask2.setStatus("DONE");
+        subtask2.setId(202);
+        subtask2.setIdEpic(epic.getId());
+        subtask2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
+        subtask2.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
+        manager.setAfterSorted.add(subtask2);
+
+        String expectedList = "[" + task.toString() + ", " +  task1.toString() + ", " +  task2.toString() + ", " +  subtask.toString() + ", " +  subtask1.toString() + ", " + subtask2.toString() + "]";
+        assertEquals(expectedList, manager.getPrioritizedTasks().toString(), "Сортировка работает не верно.");
+    }
+
+    @Test
+    public void getPrioritizedTasksTestNullStartTime(){
+        InMemoryTaskManager manager = new InMemoryTaskManager();
+
+        Task task = new Task();
+        task.setTitle("Задача");
+        task.setDescription("Функция создания задачи");
+        task.setStatus("NEW");
+        task.setId(0);
+        task.setStartTime(null);
+        manager.setAfterSorted.add(task);
+
+        Task task1 = new Task();
+        task1.setTitle("Задача1");
+        task1.setDescription("Функция создания задачи1");
+        task1.setStatus("NEW");
+        task1.setId(1);
+        task1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 01, 00));
+        task1.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 01, 00));
+        manager.setAfterSorted.add(task1);
+
+        Task task2 = new Task();
+        task2.setTitle("Задача2");
+        task2.setDescription("Функция создания задачи2");
+        task2.setStatus("NEW");
+        task2.setId(2);
+        task2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
+        task2.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
+        manager.setAfterSorted.add(task2);
+
+        Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
+
+        Subtask subtask = new Subtask();
+        subtask.setTitle("Подзадача");
+        subtask.setDescription("Подзадача эпика");
+        subtask.setStatus("DONE");
+        subtask.setId(200);
+        subtask.setIdEpic(epic.getId());
+        subtask.setStartTime(null);
+        subtask.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 03, 00));
+        manager.setAfterSorted.add(subtask);
+
+        Subtask subtask1 = new Subtask();
+        subtask1.setTitle("Подзадача1");
+        subtask1.setDescription("Подзадача эпика1");
+        subtask1.setStatus("DONE");
+        subtask1.setId(201);
+        subtask1.setIdEpic(epic.getId());
+        subtask1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
+        subtask1.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
+        manager.setAfterSorted.add(subtask1);
+
+        Subtask subtask2 = new Subtask();
+        subtask2.setTitle("Подзадача2");
+        subtask2.setDescription("Подзадача эпика2");
+        subtask2.setStatus("DONE");
+        subtask2.setId(202);
+        subtask2.setIdEpic(epic.getId());
+        subtask2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
+        subtask2.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
+        manager.setAfterSorted.add(subtask2);
+
+        String expectedList = "[" + task1.toString() + ", " +  task2.toString() + ", " +  subtask1.toString() + ", " + subtask2.toString() + ", " + task.toString() + ", " + subtask.toString() + "]";
+        assertEquals(expectedList, manager.getPrioritizedTasks().toString(), "Сортировка работает не верно.");
+    }
+
+    @Test
+    public void getPrioritizedTasksTestValidationStartTime(){
+        InMemoryTaskManager manager = new InMemoryTaskManager();
+
+        Task task = new Task();
+        task.setTitle("Задача");
+        task.setDescription("Функция создания задачи");
+        task.setStatus("NEW");
+        task.setId(0);
+        task.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 00, 00));
+        manager.setAfterSorted.add(task);
+
+        Task task1 = new Task();
+        task1.setTitle("Задача1");
+        task1.setDescription("Функция создания задачи1");
+        task1.setStatus("NEW");
+        task1.setId(1);
+        task1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 01, 00));
+        manager.setAfterSorted.add(task1);
+
+        Task task2 = new Task();
+        task2.setTitle("Задача2");
+        task2.setDescription("Функция создания задачи2");
+        task2.setStatus("NEW");
+        task2.setId(2);
+        task2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
+        task2.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
+        manager.setAfterSorted.add(task2);
+
+        Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
+
+        Subtask subtask = new Subtask();
+        subtask.setTitle("Подзадача");
+        subtask.setDescription("Подзадача эпика");
+        subtask.setStatus("DONE");
+        subtask.setId(200);
+        subtask.setIdEpic(epic.getId());
+        subtask.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 03, 00));
+        subtask.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 03, 00));
+        manager.setAfterSorted.add(subtask);
+
+        Subtask subtask1 = new Subtask();
+        subtask1.setTitle("Подзадача1");
+        subtask1.setDescription("Подзадача эпика1");
+        subtask1.setStatus("DONE");
+        subtask1.setId(201);
+        subtask1.setIdEpic(epic.getId());
+        subtask1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
+        subtask1.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
+        manager.setAfterSorted.add(subtask1);
+
+        Subtask subtask2 = new Subtask();
+        subtask2.setTitle("Подзадача2");
+        subtask2.setDescription("Подзадача эпика2");
+        subtask2.setStatus("DONE");
+        subtask2.setId(202);
+        subtask2.setIdEpic(epic.getId());
+        subtask2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
+        subtask2.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
+        manager.setAfterSorted.add(subtask2);
+
+        assertNull(manager.getPrioritizedTasks(), "Сортировка работает не верно.");
+    }
 
     @Test
     public void getEndTimeEpicINPROGRESS(){
@@ -389,46 +585,6 @@ public abstract class TaskManagerTest <T extends TaskManager>{
         assertEquals(expectedString, manager.getHistory().toString(), "Неверное отображение задачи.");
     }
 
-    @Test
-    public void getPrioritizedTasksTest(){
-        Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
-        task.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 00, 00));
-
-        Task task4 = manager.createTask("Задача", "Функция создания задачи", "NEW");
-        task4.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 00, 00));
-        task4.setEndTime(task.getEndTime());
-        task4.setId(task.getId());
-
-        Task task1 = manager.createTask("Задача 1", "Функция создания задачи 1", "DONE");
-        task1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 01, 00));
-        Task task2 = manager.createTask("Задача 2", "Функция создания задачи 2", "DONE");
-        task2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
-
-        Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
-
-        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "DONE");
-        subtask.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 03, 00));
-        Subtask subtask1 = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика 1", "DONE");
-        subtask1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
-        Subtask subtask2 = manager.createSubtask(epic.getId(), "Подзадача 2", "Подзадача эпика 2", "DONE");
-        subtask2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
-
-        manager.getPrioritizedTasks();
-        System.out.println("");
-
-
-        manager.updateTask(task.getId(), "kfgnfkdmgkd", "dsgfshdfkjsdfjsdhjfk", "DONE");
-        manager.updateTask(task4.getId(), "kfgnfkdmgkd", "dsgfshdfkjsdfjsdhjfk", "DONE");
-        subtask1.setStartTime(null);
-        manager.getPrioritizedTasks();
-        System.out.println("");
-
-        manager.updateTask(task1.getId(), "sdhhfgksdhfidsj", "dsgfshdfkjsdfjsdhjfk", "DONE");
-        task1.setStartTime(null);
-
-        manager.getPrioritizedTasks();
-        System.out.println("");
-    }
 
     //С пустым списком задач.
     @Test
@@ -912,8 +1068,9 @@ public abstract class TaskManagerTest <T extends TaskManager>{
         assertNotNull(epic, "Задачи на возвращаются.");
         assertNotNull(subtask, "Задачи на возвращаются.");
 
-        assertEquals(List.of(), manager.getHistory(), "История запронена неправильно.");
+        assertEquals(List.of(), manager.getHistory(), "История записана не верно.");
     }
+
 
 }
 
