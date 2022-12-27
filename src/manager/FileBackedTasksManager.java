@@ -107,17 +107,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
 
     public String taskToString(Task task){
         String type = TypeTask.TASK.toString();
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n" , task.getId(), type, task.getTitle(), task.getStatus(), task.getDescription(), task.getTitle());
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n" , task.getId(), type, task.getTitle(), task.getStatus(), task.getDescription(), task.getTitle(), task.getStartTime(), task.getDuration(), task.getEndTime());
         return formatWrite;
     }
     public String epicToString(Epic epic){
         String type = TypeTask.EPIC.toString();
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n" , epic.getId(), type, epic.getTitle(), epic.getStatus(), epic.getDescription(), epic.getTitle());
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n" , epic.getId(), type, epic.getTitle(), epic.getStatus(), epic.getDescription(), epic.getTitle(), epic.getStartTime(), epic.getDuration(), epic.getEndTime());
         return formatWrite;
     }
     public String subtaskToString(Subtask subtask){
         String type = TypeTask.SUB.toString();
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s%n" , subtask.getId(), type, subtask.getTitle(), subtask.getStatus(), subtask.getDescription(), subtask.getIdEpic());
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n" , subtask.getId(), type, subtask.getTitle(), subtask.getStatus(), subtask.getDescription(), subtask.getIdEpic(), subtask.getStartTime(), subtask.getDuration(), subtask.getEndTime());
         return formatWrite;
     }
 
@@ -160,7 +160,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
 
     public void save() {
         try (Writer fileWriter = new FileWriter(String.valueOf(fileManager))){
-            String csvFormat = ("id,type,name,status,description,epic" + System.lineSeparator());
+            String csvFormat = ("id,type,name,status,description,epic,startTime,duration,endTime" + System.lineSeparator());
             fileWriter.write(csvFormat);
             for(Task task : super.getTask()){
                 fileWriter.write(taskToString(task));
