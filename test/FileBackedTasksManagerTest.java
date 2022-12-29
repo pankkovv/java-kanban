@@ -122,11 +122,20 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     void SaveTest() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
-        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
-        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
-        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
-        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
+        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
+        for(Long i : new Long[1000]){
+            System.out.println();
+        }
+        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
+        for(Long i : new Long[22000]){
+            System.out.println();
+        }
+        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "DONE");
+        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "DONE");
         Subtask subtask0 = managerFile.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "DONE");
+        for(Long i : new Long[2000]){
+            System.out.println();
+        }
         Subtask subtask1 = managerFile.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "DONE");
         managerFile.getTaskId(task0.getId());
         managerFile.getEpicId(epic0.getId());
@@ -137,11 +146,12 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     void LoadFromFileTest() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
-        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
-        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
-        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
-        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
+        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
+        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
+        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "DONE");
+        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "DONE");
         Subtask subtask0 = managerFile.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "DONE");
+
         Subtask subtask1 = managerFile.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "DONE");
         managerFile.getTaskId(task0.getId());
         managerFile.getEpicId(epic0.getId());
@@ -240,10 +250,10 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     void SaveTestEpicWithoutSub() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testWithoutSub.csv");
-        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
-        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
-        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
-        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
+        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
+        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
+        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "DONE");
+        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "DONE");
         managerFile.getTaskId(task0.getId());
         managerFile.getEpicId(epic0.getId());
         assertTrue(Files.exists(Paths.get("testWithoutSub.csv")), "Файл не создан.");
@@ -252,10 +262,10 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     void LoadFromFileTestEpicWithoutSub() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testWithoutSub.csv");
-        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
-        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
-        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
-        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
+        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
+        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
+        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "DONE");
+        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "DONE");
         managerFile.getTaskId(task0.getId());
         managerFile.getEpicId(epic0.getId());
         managerFile.getHistory();
@@ -300,10 +310,10 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     void SaveTestHistoryIsEmpty() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
-        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
-        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
-        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
-        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
+        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
+        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
+        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "DONE");
+        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "DONE");
         Subtask subtask0 = managerFile.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "DONE");
         Subtask subtask1 = managerFile.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "DONE");
 
@@ -314,10 +324,10 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     @Test
     void LoadFromFileTestHistoryIsEmpty() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
-        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "NEW");
-        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "NEW");
-        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "NEW");
-        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "NEW");
+        Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
+        Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
+        Epic epic0 = managerFile.createEpic("Создание эпик-задачи", "Тест реализации функции создания", "DONE");
+        Epic epic1 = managerFile.createEpic("Создание эпик-задачи №1", "Тест реализации функции создания", "DONE");
         Subtask subtask0 = managerFile.createSubtask(epic0.getId(), "Подзадача 1", "Это 1-я подзадача эпика №1", "DONE");
         Subtask subtask1 = managerFile.createSubtask(epic0.getId(), "Подзадача 2", "Это 2-я подзадача эпика №1", "DONE");
 
