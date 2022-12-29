@@ -2,8 +2,6 @@ package manager;
 
 import model.*;
 
-import java.nio.file.Paths;
-import java.util.Set;
 import java.util.TreeSet;
 
 
@@ -28,16 +26,19 @@ public class InMemoryTaskManager implements TaskManager {
             return 1;
         } else if (o1.getStartTime().isBefore(o2.getStartTime())) {
             return -1;
+        }
+
+        if (o1.equals(o2)) {
+            return 0;
         } else {
             return 1;
         }
     };
 
-    List<Task> listTask = new ArrayList<>();
+    public List<Task> listTask = new ArrayList<>();
     List<Epic> listEpic = new ArrayList<>();
-    List<Subtask> listSubtask = new ArrayList<>();
+    public List<Subtask> listSubtask = new ArrayList<>();
     public TreeSet<Task> setAfterSorted = new TreeSet<>(comparator);
-
     private int idTask = 0;
     private int idEpic = 100;
     private int idSubtask = 200;
@@ -73,6 +74,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeTask() {
         for (Task task : listTask) {
             managerHistory.remove(task.getId());
+            setAfterSorted.remove(task);
         }
         listTask.clear();
         System.out.println("Все задачи удалены.");
@@ -95,6 +97,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeSubtask() {
         for (Subtask subtask : listSubtask) {
             managerHistory.remove(subtask.getId());
+            setAfterSorted.remove(subtask);
             for (Epic epic : listEpic) {
                 if (epic.getListOfSubtasks().contains(subtask)) {
                     epic.removeListOfSubtasks(subtask);
@@ -150,8 +153,17 @@ public class InMemoryTaskManager implements TaskManager {
             task.setDuration(Duration.between(task.getStartTime(), LocalDateTime.now()));
             task.setEndTime(task.getStartTime().plus(task.getDuration()));
         }
+        for (Task oldTask : getPrioritizedTasks()) {
+            if (task.getStartTime().isEqual(oldTask.getStartTime())) {
+                throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+            } else if (oldTask.getEndTime() == null) {
+                throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+            } else if (task.getStartTime().isAfter(oldTask.getEndTime()) && task.getStartTime().isBefore(oldTask.getEndTime())) {
+                throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+            }
+        }
         listTask.add(task);
-        if(!setAfterSorted.contains(task)){
+        if (!setAfterSorted.contains(task)) {
             setAfterSorted.add(task);
         }
         return task;
@@ -186,7 +198,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask createSubtask(int idSearch, String title, String description, String status) {
-
         for (Epic epic : listEpic) {
             if (epic.getId() == idSearch) {
                 Subtask subtask = new Subtask();
@@ -200,8 +211,17 @@ public class InMemoryTaskManager implements TaskManager {
                     subtask.setDuration(Duration.between(subtask.getStartTime(), LocalDateTime.now()));
                     subtask.setEndTime(subtask.getStartTime().plus(subtask.getDuration()));
                 }
+                for (Task oldTask : getPrioritizedTasks()) {
+                    if (subtask.getStartTime().isEqual(oldTask.getStartTime())) {
+                        throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+                    } else if (oldTask.getEndTime() == null) {
+                        throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+                    } else if (subtask.getStartTime().isAfter(oldTask.getEndTime()) && subtask.getStartTime().isBefore(oldTask.getEndTime())) {
+                        throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+                    }
+                }
                 listSubtask.add(subtask);
-                if(!setAfterSorted.contains(subtask)){
+                if (!setAfterSorted.contains(subtask)) {
                     setAfterSorted.add(subtask);
                 }
                 epic.setListOfSubtasks(subtask);
@@ -232,11 +252,22 @@ public class InMemoryTaskManager implements TaskManager {
                 task.setDescription(description);
                 task.setStatus(status);
                 if (task.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
-                    if(task.getStartTime() == null){
+                    if (task.getStartTime() == null) {
                         task.setStartTime(LocalDateTime.now());
                     }
                     task.setDuration(Duration.between(task.getStartTime(), LocalDateTime.now()));
                     task.setEndTime(task.getStartTime().plus(task.getDuration()));
+                }
+                for (Task oldTask : getPrioritizedTasks()) {
+                    if (!task.equals(oldTask)) {
+                        if (task.getStartTime().isEqual(oldTask.getStartTime())) {
+                            throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+                        } else if (oldTask.getEndTime() == null) {
+                            throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+                        } else if (task.getStartTime().isAfter(oldTask.getEndTime()) && task.getStartTime().isBefore(oldTask.getEndTime())) {
+                            throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+                        }
+                    }
                 }
             }
         }
@@ -264,11 +295,22 @@ public class InMemoryTaskManager implements TaskManager {
                         subtask.setDescription(description);
                         subtask.setStatus(status);
                         if (subtask.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
-                            if(subtask.getStartTime() == null){
+                            if (subtask.getStartTime() == null) {
                                 subtask.setStartTime(LocalDateTime.now());
                             }
                             subtask.setDuration(Duration.between(subtask.getStartTime(), LocalDateTime.now()));
                             subtask.setEndTime(subtask.getStartTime().plus(subtask.getDuration()));
+                        }
+                        for (Task oldTask : getPrioritizedTasks()) {
+                            if (!subtask.equals(oldTask)) {
+                                if (subtask.getStartTime().isEqual(oldTask.getStartTime())) {
+                                    throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+                                } else if (oldTask.getEndTime() == null) {
+                                    throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+                                } else if (subtask.getStartTime().isAfter(oldTask.getEndTime()) && subtask.getStartTime().isBefore(oldTask.getEndTime())) {
+                                    throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
+                                }
+                            }
                         }
                         generatorStatusEpic(idSearchEpic);
                         getEndTimeEpic(idSearchEpic);
@@ -283,6 +325,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeTaskId(int idSearch) {
         for (Task task : listTask) {
             if (task.getId() == idSearch) {
+                setAfterSorted.remove(task);
                 managerHistory.remove(task.getId());
                 listTask.remove(task);
                 return;
@@ -316,6 +359,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
                 generatorStatusEpic(subtask.getIdEpic());
                 getEndTimeEpic(subtask.getIdEpic());
+                setAfterSorted.remove(subtask);
                 managerHistory.remove(subtask.getId());
                 listSubtask.remove(subtask);
                 return;
@@ -427,32 +471,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public List<Task> getPrioritizedTasks() {
-        int countTaskInProcess = 0;
-        try {
-            List<Task> listAfterSorted = new ArrayList<>();
-
-            listAfterSorted.addAll(setAfterSorted);
-
-            for(Task task : listAfterSorted){
-                if(task.getEndTime() == null){
-                    countTaskInProcess++;
-                }
-            }
-
-            if (countTaskInProcess > 1) {
-                throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
-            }
-
-            return listAfterSorted;
-
-        } catch (ValidationTaskException e) {
-            System.out.println(e.getMessage());
-        }
-        return null;
+        List<Task> listAfterSorted = new ArrayList<>();
+        listAfterSorted.addAll(setAfterSorted);
+        return listAfterSorted;
     }
 
     public static class ValidationTaskException extends RuntimeException {
-        public ValidationTaskException() {}
+        public ValidationTaskException() {
+        }
+
         public ValidationTaskException(final String message) {
             super(message);
         }
