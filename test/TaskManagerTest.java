@@ -11,15 +11,16 @@ import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public abstract class TaskManagerTest <T extends TaskManager>{
+public abstract class TaskManagerTest<T extends TaskManager> {
 
     TaskManager manager = (T) new FileBackedTasksManager();
 
     //Test generator status method
     @Test
-    public void generatorStatusForEpicWithoutSubtask(){
+    public void generatorStatusForEpicWithoutSubtask() {
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
 
         final List<Epic> tasks = manager.getEpic();
@@ -37,7 +38,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void generatorStatusForEpicSubtaskStatusNew(){
+    public void generatorStatusForEpicSubtaskStatusNew() {
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "NEW");
         Subtask subtask1 = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "NEW");
@@ -49,7 +50,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void generatorStatusForEpicSubtaskStatusInProgress(){
+    public void generatorStatusForEpicSubtaskStatusInProgress() {
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "IN_PROGRESS");
         Subtask subtask1 = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "IN_PROGRESS");
@@ -61,7 +62,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void generatorStatusForEpicSubtaskStatusDone(){
+    public void generatorStatusForEpicSubtaskStatusDone() {
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "DONE");
         Subtask subtask1 = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
@@ -74,7 +75,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void generatorStatusForEpicSubtaskStatusNewDone(){
+    public void generatorStatusForEpicSubtaskStatusNewDone() {
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "NEW");
         Subtask subtask1 = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
@@ -88,7 +89,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
 
     //Test getEndTimeEpic method
     @Test
-    public void getEndTimeEpicNEW(){
+    public void getEndTimeEpicNEW() {
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "NEW");
 
@@ -102,8 +103,8 @@ public abstract class TaskManagerTest <T extends TaskManager>{
 
     //Test getPrioritizedTasksTest method
     @Test
-    public void getPrioritizedTasksTestNormalStartTime(){
-        InMemoryTaskManager manager = new InMemoryTaskManager();
+    public void getPrioritizedTasksTestNormalStartTime() {
+        InMemoryTaskManager managerNew = new InMemoryTaskManager();
 
         Task task = new Task();
         task.setTitle("Задача");
@@ -112,27 +113,33 @@ public abstract class TaskManagerTest <T extends TaskManager>{
         task.setId(0);
         task.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 00, 00));
         task.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 00, 00));
-        manager.setAfterSorted.add(task);
+        managerNew.listTask.add(task);
+        managerNew.setAfterSorted.add(task);
 
         Task task1 = new Task();
         task1.setTitle("Задача1");
         task1.setDescription("Функция создания задачи1");
-        task1.setStatus("NEW");
+        task1.setStatus("DONE");
         task1.setId(1);
         task1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 01, 00));
         task1.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 01, 00));
-        manager.setAfterSorted.add(task1);
+        managerNew.listTask.add(task1);
+        managerNew.setAfterSorted.add(task1);
 
         Task task2 = new Task();
         task2.setTitle("Задача2");
         task2.setDescription("Функция создания задачи2");
-        task2.setStatus("NEW");
+        task2.setStatus("DONE");
         task2.setId(2);
         task2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
         task2.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 02, 00));
-        manager.setAfterSorted.add(task2);
+        managerNew.listTask.add(task2);
+        managerNew.setAfterSorted.add(task2);
 
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
+
+        managerNew.updateTask(task.getId(), "asdfsdf", "asdasd", "DONE");
+        managerNew.removeTaskId(task1.getId());
 
         Subtask subtask = new Subtask();
         subtask.setTitle("Подзадача");
@@ -142,7 +149,8 @@ public abstract class TaskManagerTest <T extends TaskManager>{
         subtask.setIdEpic(epic.getId());
         subtask.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 03, 00));
         subtask.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 03, 00));
-        manager.setAfterSorted.add(subtask);
+        managerNew.listSubtask.add(subtask);
+        managerNew.setAfterSorted.add(subtask);
 
         Subtask subtask1 = new Subtask();
         subtask1.setTitle("Подзадача1");
@@ -152,7 +160,8 @@ public abstract class TaskManagerTest <T extends TaskManager>{
         subtask1.setIdEpic(epic.getId());
         subtask1.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
         subtask1.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 04, 00));
-        manager.setAfterSorted.add(subtask1);
+        managerNew.listSubtask.add(subtask1);
+        managerNew.setAfterSorted.add(subtask1);
 
         Subtask subtask2 = new Subtask();
         subtask2.setTitle("Подзадача2");
@@ -162,14 +171,72 @@ public abstract class TaskManagerTest <T extends TaskManager>{
         subtask2.setIdEpic(epic.getId());
         subtask2.setStartTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
         subtask2.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
-        manager.setAfterSorted.add(subtask2);
+        managerNew.listSubtask.add(subtask2);
+        managerNew.setAfterSorted.add(subtask2);
 
-        String expectedList = "[" + task.toString() + ", " +  task1.toString() + ", " +  task2.toString() + ", " +  subtask.toString() + ", " +  subtask1.toString() + ", " + subtask2.toString() + "]";
-        assertEquals(expectedList, manager.getPrioritizedTasks().toString(), "Сортировка работает не верно.");
+        String expectedList = "[" + task.toString() + ", " + task2.toString() + ", " + subtask.toString() + ", " + subtask1.toString() + ", " + subtask2.toString() + "]";
+        assertEquals(expectedList, managerNew.getPrioritizedTasks().toString(), "Сортировка работает не верно.");
+    }
+
+    //Validation method create and update task
+    @Test
+    public void validCreateTaskTest() {
+        Task task = manager.createTask("sdfdsfg", "dfgfdg", "NEW");
+        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
+            @Override
+            public void execute() {
+                Task task1=  manager.createTask("sdfdsfg", "dfgfdg", "NEW");
+            }
+        });
+        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
     }
 
     @Test
-    public void getPrioritizedTasksTestNullStartTime(){
+    public void validCreateSubTest() {
+        Epic epic = manager.createEpic("dsfsdf", "fdsfsdf", "NEW");
+        Subtask subtask = manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "NEW");
+        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
+            @Override
+            public void execute() {
+                Subtask subtask1=  manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "DONE");
+            }
+        });
+        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
+    }
+
+    @Test
+    public void validUpdateTaskTest() {
+        Task task = manager.createTask("sdfdsfg", "dfgfdg", "DONE");
+        Task task1 = manager.createTask("sdgfdgfdsfg", "dfggffdg", "NEW");
+        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
+            @Override
+            public void execute() {
+                manager.updateTask(task.getId(), "sdfsdfdfgfdfs", "fdsfdfgdfgsdf", "NEW");;
+            }
+        });
+        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
+    }
+
+    @Test
+    public void validUpdateSubtaskTest() {
+        Epic epic = manager.createEpic("dsfsdf", "fdsfsdf", "NEW");
+        Subtask subtask = manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "DONE");
+        for(Long i : new Long[1000]){
+            System.out.println();
+        }
+        Subtask subtask1 = manager.createSubtask(epic.getId(), "sdgfhgfhfsdfs", "fdsfgfhfghsdf", "NEW");
+
+        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
+            @Override
+            public void execute() {
+                manager.updateSubtask(epic.getId(), subtask.getId(), "sdfsdfdfgfdfs", "fdsfdfgdfgsdf", "NEW");
+            }
+        });
+        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
+    }
+
+    @Test
+    public void getPrioritizedTasksTestNullStartTime() {
         InMemoryTaskManager manager = new InMemoryTaskManager();
 
         Task task = new Task();
@@ -230,12 +297,12 @@ public abstract class TaskManagerTest <T extends TaskManager>{
         subtask2.setEndTime(LocalDateTime.of(2022, 12, 24, 14, 05, 00));
         manager.setAfterSorted.add(subtask2);
 
-        String expectedList = "[" + task1.toString() + ", " +  task2.toString() + ", " +  subtask1.toString() + ", " + subtask2.toString() + ", " + task.toString() + ", " + subtask.toString() + "]";
+        String expectedList = "[" + task1.toString() + ", " + task2.toString() + ", " + subtask1.toString() + ", " + subtask2.toString() + ", " + task.toString() + ", " + subtask.toString() + "]";
         assertEquals(expectedList, manager.getPrioritizedTasks().toString(), "Сортировка работает не верно.");
     }
 
     @Test
-    public void getPrioritizedTasksTestValidationStartTime(){
+    public void getPrioritizedTasksTestValidationStartTime() {
         InMemoryTaskManager manager = new InMemoryTaskManager();
 
         Task task = new Task();
@@ -299,7 +366,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void getEndTimeEpicINPROGRESS(){
+    public void getEndTimeEpicINPROGRESS() {
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "IN_PROGRESS");
 
@@ -313,7 +380,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void getEndTimeEpicDONE(){
+    public void getEndTimeEpicDONE() {
         Long[] streamTimeout = new Long[1000];
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask0 = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "NEW");
@@ -326,14 +393,14 @@ public abstract class TaskManagerTest <T extends TaskManager>{
         assertNotNull(subtask2, "Задача не создана.");
 
         manager.updateSubtask(epic.getId(), subtask0.getId(), "Подзадача NEW", "Подзадача эпика", "DONE");
-        for(Long i : streamTimeout){
+        for (Long i : streamTimeout) {
             System.out.println(" ");
         }
         manager.updateSubtask(epic.getId(), subtask1.getId(), "Подзадача NEW", "Подзадача эпика", "DONE");
-        for(Long i : streamTimeout){
+        for (Long i : streamTimeout) {
             System.out.println(" ");
         }
-        for(Long i : streamTimeout){
+        for (Long i : streamTimeout) {
             System.out.println(" ");
         }
         manager.updateSubtask(epic.getId(), subtask2.getId(), "Подзадача NEW", "Подзадача эпика", "DONE");
@@ -358,6 +425,9 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     @Test
     public void createNewTask() {
         Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
+        Task task1 = manager.createTask("Задача", "Функция создания задачи", "NEW");
+        Task task2 = manager.createTask("Задача", "Функция создания задачи", "NEW");
+        Task task3 = manager.createTask("Задача", "Функция создания задачи", "NEW");
         final Task savedTask = manager.getTaskId(task.getId());
 
         assertNotNull(savedTask, "Задача не найдена.");
@@ -463,7 +533,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
 
     @Test
     public void removeExistingTaskId() {
-        Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
+        Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
 
         final List<Task> tasks = manager.getTask();
 
@@ -559,7 +629,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void generatorIdForTasks(){
+    public void generatorIdForTasks() {
         Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "NEW");
@@ -570,14 +640,14 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void getHistoryTest(){
+    public void getHistoryTest() {
         Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "NEW");
         manager.getTaskId(task.getId());
         manager.getEpicId(epic.getId());
         manager.getSubtaskId(subtask.getId());
-        String expectedString ="[" + task.toString() + ", " + epic.toString() + ", " + subtask.toString() + "]";
+        String expectedString = "[" + task.toString() + ", " + epic.toString() + ", " + subtask.toString() + "]";
 
         assertNotNull(task, "Задача не создана");
         assertNotNull(epic, "Задача не создана");
@@ -773,7 +843,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void getHistoryEmpty(){
+    public void getHistoryEmpty() {
         final List<Task> tasks = manager.getTask();
         final List<Epic> epics = manager.getEpic();
         final List<Subtask> subs = manager.getSubtask();
@@ -1035,7 +1105,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void generatorIdForTasksWrong(){
+    public void generatorIdForTasksWrong() {
         Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "NEW");
@@ -1053,7 +1123,7 @@ public abstract class TaskManagerTest <T extends TaskManager>{
     }
 
     @Test
-    public void getHistoryWrong(){
+    public void getHistoryWrong() {
         Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "NEW");
