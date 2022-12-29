@@ -154,9 +154,7 @@ public class InMemoryTaskManager implements TaskManager {
             task.setEndTime(task.getStartTime().plus(task.getDuration()));
         }
         for (Task oldTask : getPrioritizedTasks()) {
-            if (task.getStartTime().isEqual(oldTask.getStartTime())) {
-                throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
-            } else if (oldTask.getEndTime() == null) {
+            if (oldTask.getEndTime() == null) {
                 throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
             } else if (task.getStartTime().isAfter(oldTask.getEndTime()) && task.getStartTime().isBefore(oldTask.getEndTime())) {
                 throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
@@ -212,9 +210,7 @@ public class InMemoryTaskManager implements TaskManager {
                     subtask.setEndTime(subtask.getStartTime().plus(subtask.getDuration()));
                 }
                 for (Task oldTask : getPrioritizedTasks()) {
-                    if (subtask.getStartTime().isEqual(oldTask.getStartTime())) {
-                        throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
-                    } else if (oldTask.getEndTime() == null) {
+                    if (oldTask.getEndTime() == null) {
                         throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
                     } else if (subtask.getStartTime().isAfter(oldTask.getEndTime()) && subtask.getStartTime().isBefore(oldTask.getEndTime())) {
                         throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
@@ -260,9 +256,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
                 for (Task oldTask : getPrioritizedTasks()) {
                     if (!task.equals(oldTask)) {
-                        if (task.getStartTime().isEqual(oldTask.getStartTime())) {
-                            throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
-                        } else if (oldTask.getEndTime() == null) {
+                        if (oldTask.getEndTime() == null) {
                             throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
                         } else if (task.getStartTime().isAfter(oldTask.getEndTime()) && task.getStartTime().isBefore(oldTask.getEndTime())) {
                             throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
@@ -303,9 +297,7 @@ public class InMemoryTaskManager implements TaskManager {
                         }
                         for (Task oldTask : getPrioritizedTasks()) {
                             if (!subtask.equals(oldTask)) {
-                                if (subtask.getStartTime().isEqual(oldTask.getStartTime())) {
-                                    throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
-                                } else if (oldTask.getEndTime() == null) {
+                                if (oldTask.getEndTime() == null) {
                                     throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
                                 } else if (subtask.getStartTime().isAfter(oldTask.getEndTime()) && subtask.getStartTime().isBefore(oldTask.getEndTime())) {
                                     throw new ValidationTaskException("Нельзя выполнять сразу несколько задач.");
