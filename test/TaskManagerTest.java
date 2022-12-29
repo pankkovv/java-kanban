@@ -178,63 +178,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(expectedList, managerNew.getPrioritizedTasks().toString(), "Сортировка работает не верно.");
     }
 
-    //Validation method create and update task
-    @Test
-    public void validCreateTaskTest() {
-        Task task = manager.createTask("sdfdsfg", "dfgfdg", "NEW");
-        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
-            @Override
-            public void execute() {
-                Task task1=  manager.createTask("sdfdsfg", "dfgfdg", "NEW");
-            }
-        });
-        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
-    }
-
-    @Test
-    public void validCreateSubTest() {
-        Epic epic = manager.createEpic("dsfsdf", "fdsfsdf", "NEW");
-        Subtask subtask = manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "NEW");
-        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
-            @Override
-            public void execute() {
-                Subtask subtask1=  manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "DONE");
-            }
-        });
-        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
-    }
-
-    @Test
-    public void validUpdateTaskTest() {
-        Task task = manager.createTask("sdfdsfg", "dfgfdg", "DONE");
-        Task task1 = manager.createTask("sdgfdgfdsfg", "dfggffdg", "NEW");
-        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
-            @Override
-            public void execute() {
-                manager.updateTask(task.getId(), "sdfsdfdfgfdfs", "fdsfdfgdfgsdf", "NEW");;
-            }
-        });
-        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
-    }
-
-    @Test
-    public void validUpdateSubtaskTest() {
-        Epic epic = manager.createEpic("dsfsdf", "fdsfsdf", "NEW");
-        Subtask subtask = manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "DONE");
-        for(Long i : new Long[1000]){
-            System.out.println();
-        }
-        Subtask subtask1 = manager.createSubtask(epic.getId(), "sdgfhgfhfsdfs", "fdsfgfhfghsdf", "NEW");
-
-        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
-            @Override
-            public void execute() {
-                manager.updateSubtask(epic.getId(), subtask.getId(), "sdfsdfdfgfdfs", "fdsfdfgdfgsdf", "NEW");
-            }
-        });
-        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
-    }
-
     @Test
     public void getPrioritizedTasksTestNullStartTime() {
         InMemoryTaskManager manager = new InMemoryTaskManager();
@@ -365,6 +308,63 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertNull(manager.getPrioritizedTasks(), "Сортировка работает не верно.");
     }
 
+    //Validation method create and update task
+    @Test
+    public void validCreateTaskTest() {
+        Task task = manager.createTask("sdfdsfg", "dfgfdg", "NEW");
+        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
+            @Override
+            public void execute() {
+                Task task1=  manager.createTask("sdfdsfg", "dfgfdg", "NEW");
+            }
+        });
+        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
+    }
+
+    @Test
+    public void validCreateSubTest() {
+        Epic epic = manager.createEpic("dsfsdf", "fdsfsdf", "NEW");
+        Subtask subtask = manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "NEW");
+        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
+            @Override
+            public void execute() {
+                Subtask subtask1=  manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "DONE");
+            }
+        });
+        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
+    }
+
+    @Test
+    public void validUpdateTaskTest() {
+        Task task = manager.createTask("sdfdsfg", "dfgfdg", "DONE");
+        Task task1 = manager.createTask("sdgfdgfdsfg", "dfggffdg", "NEW");
+        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
+            @Override
+            public void execute() {
+                manager.updateTask(task.getId(), "sdfsdfdfgfdfs", "fdsfdfgdfgsdf", "NEW");;
+            }
+        });
+        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
+    }
+
+    @Test
+    public void validUpdateSubtaskTest() {
+        Epic epic = manager.createEpic("dsfsdf", "fdsfsdf", "NEW");
+        Subtask subtask = manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "DONE");
+        for(Long i : new Long[1000]){
+            System.out.println();
+        }
+        Subtask subtask1 = manager.createSubtask(epic.getId(), "sdgfhgfhfsdfs", "fdsfgfhfghsdf", "NEW");
+
+        final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
+            @Override
+            public void execute() {
+                manager.updateSubtask(epic.getId(), subtask.getId(), "sdfsdfdfgfdfs", "fdsfdfgdfgsdf", "NEW");
+            }
+        });
+        assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
+    }
+
     @Test
     public void getEndTimeEpicINPROGRESS() {
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
@@ -419,7 +419,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(epic.getStartTime(), subtask0.getStartTime(), "Время начала epic записано не верно.");
         assertEquals(expectedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd||HH:mm:ss")), epic.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd||HH:mm:ss")), "Время окончания epic записано не верно.");
     }
-
 
     //Со стандартным поведением.
     @Test
