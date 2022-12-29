@@ -73,9 +73,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     public void generatorStatusForEpicSubtaskStatusNewDone() {
         Epic epic = manager.createEpic("Эпик-задачи", "Функция создания", "NEW");
         Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача", "Подзадача эпика", "DONE");
-        for(Long i : new Long[15000]){
-            System.out.println();
-        }
         Subtask subtask2 = manager.createSubtask(epic.getId(), "Подзадача 2", "Подзадача эпика", "NEW");
 
         manager.generatorStatusEpic(epic.getId());
