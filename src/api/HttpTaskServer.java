@@ -626,19 +626,6 @@ public class HttpTaskServer {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        Gson gson = new Gson();
-        TaskManager manager = Managers.getDefault();
-        Task task = manager.createTask("aaa", "aaaa", "aaaaa");
-        String jTask = gson.toJson(task);
-        System.out.println(jTask);
-        Task str = new Task();
-        System.out.println(str);
-
-        String n = "/tasks/task/update/?id=1111";
-        String[] m = n.split("/");
-        System.out.println(m[4].startsWith("?id"));
-
-
         HttpTaskServer api = new HttpTaskServer();
         MethodHandler method = new HttpTaskServer.MethodHandler();
         api.httpServer.createContext("/tasks", method);
