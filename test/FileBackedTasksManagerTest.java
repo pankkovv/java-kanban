@@ -53,7 +53,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void TaskFromStringTest() {
+    void taskFromStringTest() {
         String value = "1,TASK,Задача,NEW,Функция создания задачи,Задача";
         String[] taskArray = value.split(",");
         Task task = manager.createTask(taskArray[2], taskArray[4], taskArray[3]);
@@ -64,7 +64,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void EpicFromStringTest() {
+    void epicFromStringTest() {
         String value = "100,EPIC,Задача,NEW,Функция создания задачи,Задача";
         String[] taskArray = value.split(",");
         Epic task = manager.createEpic(taskArray[2], taskArray[4], taskArray[3]);
@@ -75,7 +75,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void SubFromStringTest() {
+    void subFromStringTest() {
         String value = "200,SUB,Задача,NEW,Функция создания задачи,100";
         String[] taskArray = value.split(",");
         Epic epic = manager.createEpic("Задача", "Функция создания задачи", "NEW");
@@ -87,7 +87,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void HistoryToStringTest() {
+    void historyToStringTest() {
         HistoryManager historyManager = new InMemoryHistoryManager();
         StringBuilder formatWrite = new StringBuilder();
         Epic epic = manager.createEpic("Задача", "Функция создания задачи", "NEW");
@@ -107,7 +107,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void HistoryFromStringTest() {
+    void historyFromStringTest() {
         String value = "100,200";
         String[] historyArray = value.split(",");
         List<Integer> historyList = new ArrayList<>();
@@ -120,7 +120,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void SaveTest() {
+    void saveTest() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
@@ -135,7 +135,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void LoadFromFileTest() {
+    void loadFromFileTest() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("test.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
@@ -188,7 +188,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
     //Пустой список задач.
     @Test
-    void SaveTestEmpty() {
+    void saveTestEmpty() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
         managerFile.getHistory();
         managerFile.save();
@@ -196,7 +196,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void LoadFromFileTestEmpty() {
+    void loadFromFileTestEmpty() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
         managerFile.getHistory();
         managerFile.save();
@@ -239,7 +239,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
     // Эпик без подзадач.
     @Test
-    void SaveTestEpicWithoutSub() {
+    void saveTestEpicWithoutSub() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testWithoutSub.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
@@ -251,7 +251,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void LoadFromFileTestEpicWithoutSub() {
+    void loadFromFileTestEpicWithoutSub() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testWithoutSub.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
@@ -299,7 +299,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
     //Пустой список истории.
     @Test
-    void SaveTestHistoryIsEmpty() {
+    void saveTestHistoryIsEmpty() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
@@ -313,7 +313,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
-    void LoadFromFileTestHistoryIsEmpty() {
+    void loadFromFileTestHistoryIsEmpty() {
         FileBackedTasksManager managerFile = new FileBackedTasksManager("testIsEmpty.csv");
         Task task0 = managerFile.createTask("Создать задачу", "Реализация функции создания задачи", "DONE");
         Task task1 = managerFile.createTask("Создать еще одну задачу", "Реализация функции создания задачи вторая попытка", "DONE");
