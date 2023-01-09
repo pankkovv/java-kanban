@@ -24,11 +24,14 @@ public class Subtask extends Task {
         if(endTime != null){
             end = endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss"));
         }
-        return "{" + "title='" + title + '\'' + ", idEpic='" + idEpic + '\'' +
-                ", description='" + description + '\'' +
+        return "{" + "title=" + title +
+                ", idEpic=" + idEpic +
+                ", description=" + description +
                 ", id=" + id +
-                ", status='" + status + '\'' + ", startTime='" + start + '\'' + ", endTime='" + end + '\'' +
-                '}';
+                ", status=" + status +
+                ", startTime=" + start +
+                ", endTime=" + end +
+                "}";
     }
 
     public boolean equals(Subtask sub) {

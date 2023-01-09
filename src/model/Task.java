@@ -31,11 +31,13 @@ public class Task {
             end = endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss"));
         }
         return "{" +
-                "title='" + title + '\'' +
-                ", description='" + description + '\'' +
+                "title=" + title +
+                ", description=" + description +
                 ", id=" + id +
-                ", status='" + status + '\'' + ", startTime='" + start + '\'' + ", endTime='" + end + '\'' +
-                '}';
+                ", status=" + status +
+                ", startTime=" + start +
+                ", endTime=" + end +
+                "}";
     }
 
 
