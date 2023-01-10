@@ -22,5 +22,8 @@ public enum Endpoint {
     DELETE_TASKID,
     DELETE_EPICID,
     DELETE_SUBID,
+    REGISTER,
+    SAVE,
+    LOAD,
     UNKNOW
 }

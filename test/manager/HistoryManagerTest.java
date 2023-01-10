@@ -1,6 +1,5 @@
-import manager.HistoryManager;
-import manager.Managers;
-import manager.TaskManager;
+package manager;
+
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -16,9 +15,9 @@ class HistoryManagerTest {
     void addTestHistoryIsEmpty() {
         HistoryManager historyManager = Managers.getDefaultHistory();
         TaskManager manager = Managers.getDefault();
-        Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
-        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "NEW");
-        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "NEW");
+        Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
+        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "DONE");
+        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
 
         assertNotNull(task, "Задача не создана");
         assertNotNull(epic, "Задача не создана");
@@ -40,9 +39,9 @@ class HistoryManagerTest {
     void removeTestHistoryIsEmpty() {
         HistoryManager historyManager = Managers.getDefaultHistory();
         TaskManager manager = Managers.getDefault();
-        Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
-        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "NEW");
-        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "NEW");
+        Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
+        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "DONE");
+        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
 
         assertNotNull(task, "Задача не создана");
         assertNotNull(epic, "Задача не создана");
@@ -61,9 +60,9 @@ class HistoryManagerTest {
     void addAndGetTestDuplication() {
         HistoryManager historyManager = Managers.getDefaultHistory();
         TaskManager manager = Managers.getDefault();
-        Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
-        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "NEW");
-        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "NEW");
+        Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
+        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "DONE");
+        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
 
         assertNotNull(task, "Задача не создана");
         assertNotNull(epic, "Задача не создана");
@@ -82,9 +81,9 @@ class HistoryManagerTest {
     void removeTestDuplication() {
         HistoryManager historyManager = Managers.getDefaultHistory();
         TaskManager manager = Managers.getDefault();
-        Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
-        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "NEW");
-        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "NEW");
+        Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
+        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "DONE");
+        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
 
         assertNotNull(task, "Задача не создана");
         assertNotNull(epic, "Задача не создана");
@@ -109,9 +108,9 @@ class HistoryManagerTest {
 void removeTestRemoveBeginning() {
     HistoryManager historyManager = Managers.getDefaultHistory();
     TaskManager manager = Managers.getDefault();
-    Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
-    Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "NEW");
-    Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "NEW");
+    Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
+    Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "DONE");
+    Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
 
     assertNotNull(task, "Задача не создана");
     assertNotNull(epic, "Задача не создана");
@@ -130,9 +129,9 @@ void removeTestRemoveBeginning() {
     void removeTestRemoveMiddle() {
         HistoryManager historyManager = Managers.getDefaultHistory();
         TaskManager manager = Managers.getDefault();
-        Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
-        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "NEW");
-        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "NEW");
+        Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
+        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "DONE");
+        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
 
         assertNotNull(task, "Задача не создана");
         assertNotNull(epic, "Задача не создана");
@@ -151,9 +150,9 @@ void removeTestRemoveBeginning() {
     void removeTestRemoveEnd() {
         HistoryManager historyManager = Managers.getDefaultHistory();
         TaskManager manager = Managers.getDefault();
-        Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
-        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "NEW");
-        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "NEW");
+        Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
+        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "DONE");
+        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
 
         assertNotNull(task, "Задача не создана");
         assertNotNull(epic, "Задача не создана");

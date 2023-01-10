@@ -145,7 +145,6 @@ public class InMemoryTaskManager implements TaskManager {
         task.setTitle(title);
         task.setDescription(description);
         task.setStatus(status);
-        task.setStatus(status);
         if(!(status.equals(String.valueOf(StatusOfTask.NEW)) || status.equals(String.valueOf(StatusOfTask.IN_PROGRESS)) || status.equals(String.valueOf(StatusOfTask.DONE)))){
             throw new ValidationTaskException("Нельзя использовать статус:" + status);
         }

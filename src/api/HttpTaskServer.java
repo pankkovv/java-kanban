@@ -1,15 +1,17 @@
 package api;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import manager.FileBackedTasksManager;
+import manager.HttpTaskManager;
 import manager.InMemoryTaskManager;
 import manager.Managers;
-import manager.TaskManager;
 import model.Endpoint;
-import model.Epic;
 import model.Subtask;
 import model.Task;
 
@@ -17,23 +19,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static jdk.internal.util.xml.XMLStreamWriter.DEFAULT_CHARSET;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
-
-    static Gson gson = new Gson();
+    Gson gson = new Gson();
+    private static HttpTaskManager manager;
     public HttpServer server;
-    static TaskManager manager = Managers.getDefault();
 
-    public HttpTaskServer() throws IOException {
+    public HttpTaskServer() throws IOException, InterruptedException {
+        manager = Managers.getHttpDefault("http://localhost:8078");
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
+        server.createContext("/save", new MethodHandler());
+        server.createContext("/load", new MethodHandler());
         server.createContext("/tasks", new MethodHandler());
         server.createContext("/tasks/task", new MethodHandler());
         server.createContext("/tasks/epic", new MethodHandler());
@@ -48,7 +52,7 @@ public class HttpTaskServer {
         server.createContext("/tasks/upsubtask/?id=", new MethodHandler());
     }
 
-     static class MethodHandler implements HttpHandler {
+    class MethodHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
@@ -138,6 +142,18 @@ public class HttpTaskServer {
                     removeSubIdHandler(exchange);
                     break;
 
+                case SAVE:
+                    save(exchange);
+                    break;
+
+                case LOAD:
+                    try {
+                        load(exchange);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+
                 case UNKNOW:
                     writeResponse(exchange, "Некорректное действие.", 400);
             }
@@ -151,6 +167,8 @@ public class HttpTaskServer {
             case "GET":
                 if (pathParts.length == 2 && pathParts[1].equals("tasks")) {
                     return Endpoint.GET_TASKS;
+                } else if (pathParts.length == 3 && pathParts[1].equals("load")) {
+                    return Endpoint.LOAD;
                 } else if (pathParts.length == 3 && pathParts[1].equals("tasks")) {
                     if (pathParts[2].equals("task")) {
                         return Endpoint.GET_TASK;
@@ -178,7 +196,9 @@ public class HttpTaskServer {
                 break;
 
             case "POST":
-                if (pathParts.length == 3 && pathParts[1].equals("tasks")) {
+                if (pathParts.length == 2 && pathParts[1].equals("save")) {
+                    return Endpoint.SAVE;
+                } else if (pathParts.length == 3 && pathParts[1].equals("tasks")) {
                     if (pathParts[2].equals("task")) {
                         return Endpoint.POST_TASK;
                     }
@@ -198,6 +218,9 @@ public class HttpTaskServer {
                     }
                     if (pathParts[2].equals("upsubtask")) {
                         return Endpoint.POST_UPDATESUB;
+                    }
+                    if (pathParts[2].equals("save")) {
+                        return Endpoint.SAVE;
                     }
                 }
                 break;
@@ -230,20 +253,28 @@ public class HttpTaskServer {
         return Endpoint.UNKNOW;
     }
 
-    private static void writeResponse(HttpExchange exchange, String responseString, int responseCode) throws IOException {
-        if (responseString.isBlank()) {
-            exchange.sendResponseHeaders(responseCode, 0);
-        } else {
-            byte[] bytes = responseString.getBytes(DEFAULT_CHARSET);
-            exchange.sendResponseHeaders(responseCode, bytes.length);
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(bytes);
-            }
-        }
-        exchange.close();
+    public void start() {
+        System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
+        server.start();
     }
 
-    private static Optional<Integer> getTasksId(HttpExchange exchange) {
+    private void writeResponse(HttpExchange exchange, String responseString, int responseCode) throws IOException {
+        try {
+            if (responseString.isBlank()) {
+                exchange.sendResponseHeaders(responseCode, 0);
+            } else {
+                byte[] bytes = responseString.getBytes(DEFAULT_CHARSET);
+                exchange.sendResponseHeaders(responseCode, bytes.length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(bytes);
+                }
+            }
+        } finally {
+            exchange.close();
+        }
+    }
+
+    private Optional<Integer> getTasksId(HttpExchange exchange) {
         String[] pathParts = exchange.getRequestURI().getPath().split("/");
         String[] parseParts = pathParts[3].split("&");
         if (parseParts.length == 1) {
@@ -265,15 +296,58 @@ public class HttpTaskServer {
         }
     }
 
-    private static String[] getInfoTask(HttpExchange exchange) throws IOException {
+    private String[] getInfoTask(HttpExchange exchange) throws IOException {
         InputStream inputStream = exchange.getRequestBody();
         String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
         Task task = gson.fromJson(body, Task.class);
-        String[] newTask = new String[]{task.getTitle(), task.getDescription(), task.getStatus()};
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+        String formatStartTime = task.getStartTime().format(formatter);
+        String formatDuration = task.getDuration().toString();
+        String formatEndTime = task.getEndTime().format(formatter);
+        String[] newTask = new String[]{task.getTitle(), task.getDescription(), task.getStatus(), formatStartTime, formatDuration, formatEndTime};
         return newTask;
     }
 
-    private static void getPrioritizedTasks(HttpExchange httpExchange) throws IOException {
+    private void load(HttpExchange httpExchange) throws IOException, InterruptedException {
+        try{
+            String key = httpExchange.getRequestURI().getPath().substring("/load/".length());
+            String response = manager.loadKV(key);
+            if(httpExchange.getResponseCode() == 200){
+                httpExchange.sendResponseHeaders(200, 0);
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            } else if (response.equals("Key для сохранения пустой. key указывается в пути: /load/{key}")){
+                httpExchange.sendResponseHeaders(400, 0);
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            } else {
+                httpExchange.sendResponseHeaders(404, 0);
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            }
+
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void save(HttpExchange httpExchange) throws IOException {
+        try {
+            manager.saveKV();
+            String response = "Данные сохранены!";
+            httpExchange.sendResponseHeaders(404, 0);
+            try (OutputStream os = httpExchange.getResponseBody()) {
+                os.write(response.getBytes());
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void getPrioritizedTasks(HttpExchange httpExchange) throws IOException {
         List<Task> task = manager.getPrioritizedTasks();
         String response = gson.toJson(task);
         httpExchange.sendResponseHeaders(200, 0);
@@ -283,7 +357,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void getTaskHandler(HttpExchange httpExchange) throws IOException {
+    private void getTaskHandler(HttpExchange httpExchange) throws IOException {
         String response = gson.toJson(manager.getTask());
         httpExchange.sendResponseHeaders(200, 0);
         try (OutputStream os = httpExchange.getResponseBody()) {
@@ -292,7 +366,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void getEpicHandler(HttpExchange httpExchange) throws IOException {
+    private void getEpicHandler(HttpExchange httpExchange) throws IOException {
         String response = gson.toJson(manager.getEpic());
         httpExchange.sendResponseHeaders(200, 0);
         try (OutputStream os = httpExchange.getResponseBody()) {
@@ -301,7 +375,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void getSubHandler(HttpExchange httpExchange) throws IOException {
+    private void getSubHandler(HttpExchange httpExchange) throws IOException {
         String response = gson.toJson(manager.getSubtask());
         httpExchange.sendResponseHeaders(200, 0);
         try (OutputStream os = httpExchange.getResponseBody()) {
@@ -310,7 +384,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void getTaskId(HttpExchange httpExchange) throws IOException {
+    private void getTaskId(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -332,7 +406,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void getEpicId(HttpExchange httpExchange) throws IOException {
+    private void getEpicId(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -354,7 +428,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void getSubId(HttpExchange httpExchange) throws IOException {
+    private void getSubId(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -376,7 +450,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void getAllSubHandler(HttpExchange httpExchange) throws IOException {
+    private void getAllSubHandler(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -396,7 +470,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void getHistoryHandler(HttpExchange httpExchange) throws IOException {
+    private void getHistoryHandler(HttpExchange httpExchange) throws IOException {
         String response = gson.toJson(manager.getHistory());
         httpExchange.sendResponseHeaders(200, 0);
         try (OutputStream os = httpExchange.getResponseBody()) {
@@ -405,12 +479,17 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void createTaskHandler(HttpExchange httpExchange) throws IOException {
+    private void createTaskHandler(HttpExchange httpExchange) throws IOException {
         String[] newTask = getInfoTask(httpExchange);
         if (!newTask[0].equals("null") && !newTask[1].equals("null") && !newTask[2].equals("null")) {
             httpExchange.sendResponseHeaders(200, 0);
             try {
-                String response = gson.toJson(manager.createTask(newTask[0], newTask[1], newTask[2]));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+                Task task = manager.createTask(newTask[0], newTask[1], newTask[2]);
+                task.setStartTime(LocalDateTime.parse(newTask[3], formatter));
+                task.setDuration(Duration.parse(newTask[4]));
+                task.setStartTime(LocalDateTime.parse(newTask[5], formatter));
+                String response = gson.toJson(task);
                 try (OutputStream os = httpExchange.getResponseBody()) {
                     os.write("Задача создана:\n".getBytes());
                     os.write(response.getBytes());
@@ -426,7 +505,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void createEpicHandler(HttpExchange httpExchange) throws IOException {
+    private void createEpicHandler(HttpExchange httpExchange) throws IOException {
         String[] newTask = getInfoTask(httpExchange);
         if (!newTask[0].equals("null") && !newTask[1].equals("null") && !newTask[2].equals("null")) {
             httpExchange.sendResponseHeaders(200, 0);
@@ -447,7 +526,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void createSubHandler(HttpExchange httpExchange) throws IOException {
+    private void createSubHandler(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -474,7 +553,7 @@ public class HttpTaskServer {
     }
 
 
-    private static void updateTaskHandler(HttpExchange httpExchange) throws IOException {
+    private void updateTaskHandler(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -495,7 +574,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void updateEpicHandler(HttpExchange httpExchange) throws IOException {
+    private void updateEpicHandler(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -516,7 +595,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void updateSubHandler(HttpExchange httpExchange) throws IOException {
+    private void updateSubHandler(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -540,7 +619,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void removeTaskHandler(HttpExchange httpExchange) throws IOException {
+    private void removeTaskHandler(HttpExchange httpExchange) throws IOException {
         manager.removeTask();
         if (manager.getTask().isEmpty()) {
             httpExchange.sendResponseHeaders(200, 0);
@@ -553,7 +632,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void removeEpicHandler(HttpExchange httpExchange) throws IOException {
+    private void removeEpicHandler(HttpExchange httpExchange) throws IOException {
         manager.removeEpic();
         if (manager.getEpic().isEmpty()) {
             httpExchange.sendResponseHeaders(200, 0);
@@ -567,7 +646,7 @@ public class HttpTaskServer {
     }
 
 
-    private static void removeSubHandler(HttpExchange httpExchange) throws IOException {
+    private void removeSubHandler(HttpExchange httpExchange) throws IOException {
         manager.removeSubtask();
         if (manager.getSubtask().isEmpty()) {
             httpExchange.sendResponseHeaders(200, 0);
@@ -580,7 +659,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void removeTaskIdHandler(HttpExchange httpExchange) throws IOException {
+    private void removeTaskIdHandler(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -598,7 +677,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void removeEpicIdHandler(HttpExchange httpExchange) throws IOException {
+    private void removeEpicIdHandler(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
@@ -616,7 +695,7 @@ public class HttpTaskServer {
         httpExchange.close();
     }
 
-    private static void removeSubIdHandler(HttpExchange httpExchange) throws IOException {
+    private void removeSubIdHandler(HttpExchange httpExchange) throws IOException {
         Optional<Integer> idOpt = getTasksId(httpExchange);
         if (idOpt.isEmpty()) {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);

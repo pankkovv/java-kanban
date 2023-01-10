@@ -17,7 +17,7 @@ import com.sun.net.httpserver.HttpServer;
 public class KVServer {
     public static final int PORT = 8078;
     private final String apiToken;
-    private final HttpServer server;
+    public static HttpServer server;
     private final Map<String, String> data = new HashMap<>();
 
     public KVServer() throws IOException {
@@ -28,101 +28,127 @@ public class KVServer {
         server.createContext("/load", this::load);
     }
 
-    private void load(HttpExchange h) throws IOException {
-        try{
-            System.out.println("\n/load");
-            String key = h.getRequestURI().getPath().substring("/load/".length());
+    private void load(HttpExchange httpExchange) throws IOException {
+        try {
+            String key = httpExchange.getRequestURI().getPath().substring("/load/".length());
             if (key.isEmpty()) {
-                System.out.println("Key для сохранения пустой. key указывается в пути: /load/{key}");
-                h.sendResponseHeaders(400, 0);
+                httpExchange.sendResponseHeaders(400, 0);
+                String response = "Key для сохранения пустой. key указывается в пути: /load/{key}";
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
                 return;
             }
 
             String response = data.get(key);
-            if(response != null){
-                h.sendResponseHeaders(200, 0);
-                try(OutputStream os = h.getResponseBody()){
+            if (response != null) {
+                httpExchange.sendResponseHeaders(200, 0);
+                try (OutputStream os = httpExchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
             } else {
-                System.out.println("Значние key: " + key + " не найдено.");
-                h.sendResponseHeaders(404, 0);
+                httpExchange.sendResponseHeaders(404, 0);
+                response = "Значние key: " + key + " не найдено.";
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
             }
         } finally {
-            h.close();
+            httpExchange.close();
         }
     }
 
-    private void save(HttpExchange h) throws IOException {
+    private void save(HttpExchange httpExchange) throws IOException {
         try {
-            System.out.println("\n/save");
-            if (!hasAuth(h)) {
-                System.out.println("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
-                h.sendResponseHeaders(403, 0);
+            if (!hasAuth(httpExchange)) {
+                httpExchange.sendResponseHeaders(403, 0);
+                String response = "Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа";
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
                 return;
             }
-            if ("POST".equals(h.getRequestMethod())) {
-                String key = h.getRequestURI().getPath().substring("/save/".length());
+
+            if ("POST".equals(httpExchange.getRequestMethod())) {
+                String key = httpExchange.getRequestURI().getPath().substring("/save/".length());
                 if (key.isEmpty()) {
-                    System.out.println("Key для сохранения пустой. key указывается в пути: /save/{key}");
-                    h.sendResponseHeaders(400, 0);
+                    httpExchange.sendResponseHeaders(400, 0);
+                    String response = "Key для сохранения пустой. key указывается в пути: /save/{key}";
+                    try (OutputStream os = httpExchange.getResponseBody()) {
+                        os.write(response.getBytes());
+                    }
                     return;
                 }
-                String value = readText(h);
+                String value = readText(httpExchange);
                 if (value.isEmpty()) {
-                    System.out.println("Value для сохранения пустой. value указывается в теле запроса");
-                    h.sendResponseHeaders(400, 0);
+                    httpExchange.sendResponseHeaders(400, 0);
+                    String response = "Value для сохранения пустой. value указывается в теле запроса";
+                    try (OutputStream os = httpExchange.getResponseBody()) {
+                        os.write(response.getBytes());
+                    }
                     return;
                 }
                 data.put(key, value);
-                System.out.println("Значение для ключа " + key + " успешно обновлено!");
-                h.sendResponseHeaders(200, 0);
+                httpExchange.sendResponseHeaders(200, 0);
+                String response = "Значение для ключа " + key + " успешно обновлено!";
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
             } else {
-                System.out.println("/save ждёт POST-запрос, а получил: " + h.getRequestMethod());
-                h.sendResponseHeaders(405, 0);
+                httpExchange.sendResponseHeaders(405, 0);
+                String response = "/save ждёт POST-запрос, а получил: " + httpExchange.getRequestMethod();
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
             }
         } finally {
-            h.close();
+            httpExchange.close();
         }
     }
 
-    private void register(HttpExchange h) throws IOException {
+    private void register(HttpExchange httpExchange) throws IOException {
         try {
-            System.out.println("\n/register");
-            if ("GET".equals(h.getRequestMethod())) {
-                sendText(h, apiToken);
+            if ("GET".equals(httpExchange.getRequestMethod())) {
+                sendText(httpExchange, apiToken);
             } else {
-                System.out.println("/register ждёт GET-запрос, а получил " + h.getRequestMethod());
-                h.sendResponseHeaders(405, 0);
+                httpExchange.sendResponseHeaders(405, 0);
+                String response = "/register ждёт GET-запрос, а получил " + httpExchange.getRequestMethod();
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
             }
         } finally {
-            h.close();
+            httpExchange.close();
         }
     }
 
     public void start() {
-        System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
+        System.out.println("KV-сервер запущен на " + PORT + " порту!");
         server.start();
+    }
+
+    public static void stop(){
+        server.stop(1/100);
     }
 
     private String generateApiToken() {
         return "" + System.currentTimeMillis();
     }
 
-    protected boolean hasAuth(HttpExchange h) {
-        String rawQuery = h.getRequestURI().getRawQuery();
+    protected boolean hasAuth(HttpExchange httpExchange) {
+        String rawQuery = httpExchange.getRequestURI().getRawQuery();
         return rawQuery != null && (rawQuery.contains("API_TOKEN=" + apiToken) || rawQuery.contains("API_TOKEN=DEBUG"));
     }
 
-    protected String readText(HttpExchange h) throws IOException {
-        return new String(h.getRequestBody().readAllBytes(), UTF_8);
+    protected String readText(HttpExchange httpExchange) throws IOException {
+        return new String(httpExchange.getRequestBody().readAllBytes(), UTF_8);
     }
 
-    protected void sendText(HttpExchange h, String text) throws IOException {
+    protected void sendText(HttpExchange httpExchange, String text) throws IOException {
         byte[] resp = text.getBytes(UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json");
-        h.sendResponseHeaders(200, resp.length);
-        h.getResponseBody().write(resp);
+        httpExchange.getResponseHeaders().add("Content-Type", "application/json");
+        httpExchange.sendResponseHeaders(200, resp.length);
+        httpExchange.getResponseBody().write(resp);
     }
 }
 

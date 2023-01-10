@@ -12,8 +12,9 @@ import java.time.Duration;
 import static jdk.internal.util.xml.XMLStreamWriter.DEFAULT_CHARSET;
 
 public class KVTaskClient {
+
     private static URI url;
-    public static String API_TOKEN;
+    private static String API_TOKEN;
 
     static HttpClient client = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
@@ -21,12 +22,13 @@ public class KVTaskClient {
 
     static HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
     public KVTaskClient(String url) throws IOException, InterruptedException {
+        new KVServer().start();
         this.url = URI.create(url);
         this.API_TOKEN = register();
     }
 
     private String register() throws IOException, InterruptedException {
-        URI authURL = URI.create(url + "register");
+        URI authURL = URI.create(url + "/register");
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(authURL)
@@ -38,7 +40,7 @@ public class KVTaskClient {
     }
 
     public static void put(String key, String json) throws IOException, InterruptedException {
-        URI urlPut = URI.create(url + "save/" + key + "?API_TOKEN=" + API_TOKEN);
+        URI urlPut = URI.create(url + "/save/" + key + "&API_TOKEN=" + API_TOKEN);
         HttpRequest requestPut = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .uri(urlPut)
@@ -48,20 +50,20 @@ public class KVTaskClient {
     }
 
     public static String load(String key) throws IOException, InterruptedException {
-        URI urlPut = URI.create(url + "load/" + key + "?API_TOKEN=" + API_TOKEN);
+        URI urlPut = URI.create(url + "/load/" + key + "&API_TOKEN=" + API_TOKEN);
         HttpRequest requestLoad = HttpRequest.newBuilder()
                 .GET()
                 .uri(urlPut)
                 .version(HttpClient.Version.HTTP_1_1)
                 .build();
-        HttpResponse<String> responsePut = client.send(requestLoad, handler);
+        HttpResponse<String> responseLoad = client.send(requestLoad, handler);
 
-        if(responsePut.statusCode() == 200){
-            return responsePut.body();
-        } else if(responsePut.statusCode() == 400) {
-            return "| 400 | Key для сохранения пустой. key указывается в пути: /load/{key}";
+        if(responseLoad.statusCode() == 200){
+            return responseLoad.body();
+        } else if(responseLoad.statusCode() == 400) {
+            return responseLoad.body();
         } else {
-            return "| 404 | Значние key: " + key + " не найдено.";
+            return responseLoad.body();
         }
     }
 }
