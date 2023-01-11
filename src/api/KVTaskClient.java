@@ -1,6 +1,5 @@
 package api;
 
-import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.net.URI;
@@ -8,8 +7,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-
-import static jdk.internal.util.xml.XMLStreamWriter.DEFAULT_CHARSET;
 
 public class KVTaskClient {
 
@@ -21,6 +18,7 @@ public class KVTaskClient {
             .build();
 
     static HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
+
     public KVTaskClient(String url) throws IOException, InterruptedException {
         new KVServer().start();
         this.url = URI.create(url);
@@ -40,7 +38,12 @@ public class KVTaskClient {
     }
 
     public static void put(String key, String json) throws IOException, InterruptedException {
-        URI urlPut = URI.create(url + "/save/" + key + "&API_TOKEN=" + API_TOKEN);
+        URI urlPut;
+        if (key.endsWith("%3F")) {
+            urlPut = URI.create(url + "/save/" + key + "&API_TOKEN=" + API_TOKEN);
+        } else {
+            urlPut = URI.create(url + "/save/" + key + "?API_TOKEN=" + API_TOKEN);
+        }
         HttpRequest requestPut = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .uri(urlPut)
@@ -50,7 +53,12 @@ public class KVTaskClient {
     }
 
     public static String load(String key) throws IOException, InterruptedException {
-        URI urlPut = URI.create(url + "/load/" + key + "&API_TOKEN=" + API_TOKEN);
+        URI urlPut;
+        if (key.endsWith("%3F")) {
+            urlPut = URI.create(url + "/load/" + key + "&API_TOKEN=" + API_TOKEN);
+        } else {
+            urlPut = URI.create(url + "/load/" + key + "?API_TOKEN=" + API_TOKEN);
+        }
         HttpRequest requestLoad = HttpRequest.newBuilder()
                 .GET()
                 .uri(urlPut)
@@ -58,9 +66,9 @@ public class KVTaskClient {
                 .build();
         HttpResponse<String> responseLoad = client.send(requestLoad, handler);
 
-        if(responseLoad.statusCode() == 200){
+        if (responseLoad.statusCode() == 200) {
             return responseLoad.body();
-        } else if(responseLoad.statusCode() == 400) {
+        } else if (responseLoad.statusCode() == 400) {
             return responseLoad.body();
         } else {
             return responseLoad.body();
