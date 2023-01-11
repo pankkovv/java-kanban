@@ -3,6 +3,7 @@ package manager;
 import model.*;
 
 import java.security.SignatureException;
+import java.time.LocalTime;
 import java.util.TreeSet;
 
 
@@ -178,21 +179,35 @@ public class InMemoryTaskManager implements TaskManager {
             throw new ValidationTaskException("Нельзя использовать статус:" + status);
         }
         epic.setId(generatorId(TypeTask.EPIC.toString()));
-        if (epic.getListOfSubtasks().size() != 0) {
-            LocalDateTime startTime = LocalDateTime.of(2000, 1, 1, 0, 0, 0);
-            for (Subtask subtask : epic.getListOfSubtasks()) {
-                if (subtask.getStartTime().isAfter(startTime)) {
-                    startTime = subtask.getStartTime();
-                }
-            }
-            epic.setStartTime(startTime);
-        } else {
-            epic.setStartTime(null);
-        }
         if (epic.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
-            epic.setStartTime(LocalDateTime.now());
+            if (epic.getListOfSubtasks().size() != 0) {
+                LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
+                if (epic.getListOfSubtasks().size() != 0) {
+                    for (Subtask subtask : epic.getListOfSubtasks()) {
+                        if (subtask.getStartTime().isBefore(startTime)) {
+                            startTime = subtask.getStartTime();
+                        }
+                    }
+                    epic.setStartTime(startTime);
+                    getEndTimeEpic(epic.getId());
+                }
+            } else {
+                epic.setStartTime(LocalDateTime.now());
+            }
             epic.setDuration(Duration.between(epic.getStartTime(), LocalDateTime.now()));
             epic.setEndTime(epic.getStartTime().plus(epic.getDuration()));
+        } else {
+            if (epic.getListOfSubtasks().size() != 0) {
+                LocalDateTime startTime = LocalDateTime.of(2000, 1, 1, 0, 0, 0);
+                for (Subtask subtask : epic.getListOfSubtasks()) {
+                    if (subtask.getStartTime().isAfter(startTime)) {
+                        startTime = subtask.getStartTime();
+                    }
+                }
+                epic.setStartTime(startTime);
+            } else {
+                epic.setStartTime(null);
+            }
         }
         listEpic.add(epic);
         return epic;
@@ -281,6 +296,31 @@ public class InMemoryTaskManager implements TaskManager {
                 epic.setTitle(title);
                 epic.setDescription(description);
                 generatorStatusEpic(idSearch);
+                if (epic.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
+                    LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
+                    Duration duration = Duration.ofSeconds(0,0);
+                    if (epic.getListOfSubtasks().size() != 0) {
+                        for (Subtask subtask : epic.getListOfSubtasks()) {
+                            if (subtask.getStartTime().isBefore(startTime)) {
+                                startTime = subtask.getStartTime();
+                            }
+                        }
+                        epic.setStartTime(startTime);
+                        getEndTimeEpic(epic.getId());
+                    }
+                } else {
+                    if (epic.getListOfSubtasks().size() != 0) {
+                        LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
+                        for (Subtask subtask : epic.getListOfSubtasks()) {
+                            if (subtask.getStartTime().isBefore(startTime)) {
+                                startTime = subtask.getStartTime();
+                            }
+                        }
+                        epic.setStartTime(startTime);
+                    } else {
+                        epic.setStartTime(null);
+                    }
+                }
                 getEndTimeEpic(idSearch);
             }
         }
