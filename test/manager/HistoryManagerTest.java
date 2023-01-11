@@ -4,6 +4,7 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
@@ -72,7 +73,7 @@ class HistoryManagerTest {
         historyManager.add(epic);
         historyManager.add(subtask);
         historyManager.add(task);
-        String expectedString ="[" + epic.toString() + ", " + subtask.toString() + ", " + task.toString() + "]";
+        String expectedString = "[" + epic.toString() + ", " + subtask.toString() + ", " + task.toString() + "]";
 
         assertEquals(expectedString, historyManager.getHistory().toString(), "Задача не отразились в истории");
     }
@@ -93,7 +94,7 @@ class HistoryManagerTest {
         historyManager.add(epic);
         historyManager.add(subtask);
         historyManager.add(task);
-        String expectedString ="[" + epic.toString() + ", " + subtask.toString() + ", " + task.toString() + "]";
+        String expectedString = "[" + epic.toString() + ", " + subtask.toString() + ", " + task.toString() + "]";
 
 
         historyManager.remove(task.getId());
@@ -103,27 +104,27 @@ class HistoryManagerTest {
         assertEquals(List.of(), historyManager.getHistory());
     }
 
-//    Удаление из истории: начало, середина, конец.
-@Test
-void removeTestRemoveBeginning() {
-    HistoryManager historyManager = Managers.getDefaultHistory();
-    TaskManager manager = Managers.getDefault();
-    Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
-    Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "DONE");
-    Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
+    //    Удаление из истории: начало, середина, конец.
+    @Test
+    void removeTestRemoveBeginning() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        TaskManager manager = Managers.getDefault();
+        Task task = manager.createTask("Задача", "Функция создания задачи", "DONE");
+        Epic epic = manager.createEpic("Эпик-задача", "Функция создания", "DONE");
+        Subtask subtask = manager.createSubtask(epic.getId(), "Подзадача 1", "Подзадача эпика", "DONE");
 
-    assertNotNull(task, "Задача не создана");
-    assertNotNull(epic, "Задача не создана");
-    assertNotNull(subtask, "Задача не создана");
+        assertNotNull(task, "Задача не создана");
+        assertNotNull(epic, "Задача не создана");
+        assertNotNull(subtask, "Задача не создана");
 
-    historyManager.add(task);
-    historyManager.add(epic);
-    historyManager.add(subtask);
-    historyManager.remove(task.getId());
-    String expectedString ="[" + epic.toString() + ", " + subtask.toString() + "]";
+        historyManager.add(task);
+        historyManager.add(epic);
+        historyManager.add(subtask);
+        historyManager.remove(task.getId());
+        String expectedString = "[" + epic.toString() + ", " + subtask.toString() + "]";
 
-    assertEquals(expectedString, historyManager.getHistory().toString(), "Задача не отразились в истории");
-}
+        assertEquals(expectedString, historyManager.getHistory().toString(), "Задача не отразились в истории");
+    }
 
     @Test
     void removeTestRemoveMiddle() {
@@ -141,7 +142,7 @@ void removeTestRemoveBeginning() {
         historyManager.add(epic);
         historyManager.add(subtask);
         historyManager.remove(epic.getId());
-        String expectedString ="[" + task.toString() + ", " + subtask.toString() + "]";
+        String expectedString = "[" + task.toString() + ", " + subtask.toString() + "]";
 
         assertEquals(expectedString, historyManager.getHistory().toString(), "Задача не отразились в истории");
     }
@@ -162,7 +163,7 @@ void removeTestRemoveBeginning() {
         historyManager.add(epic);
         historyManager.add(subtask);
         historyManager.remove(subtask.getId());
-        String expectedString ="[" + task.toString() + ", " + epic.toString() + "]";
+        String expectedString = "[" + task.toString() + ", " + epic.toString() + "]";
 
         assertEquals(expectedString, historyManager.getHistory().toString(), "Задача не отразились в истории");
     }
