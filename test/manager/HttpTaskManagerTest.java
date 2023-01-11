@@ -1,7 +1,7 @@
 package manager;
 
 import api.KVServer;
-import com.google.gson.*;
+import com.google.gson.Gson;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
@@ -10,40 +10,39 @@ import com.google.gson.stream.JsonWriter;
 import model.Epic;
 import model.Subtask;
 import model.Task;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.lang.constant.Constable;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HttpTaskManagerTest {
-    public Gson gson = new GsonBuilder()
-            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
-            .create();
+    Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter()).create();
 
-    public class LocalDateAdapter extends TypeAdapter<LocalDate> {
-        private static final DateTimeFormatter formatterWriter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
-        private static final DateTimeFormatter formatterReader = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+    public class LocalDateAdapter extends TypeAdapter<LocalDateTime> {
+        private final DateTimeFormatter formatterWriter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+        private final DateTimeFormatter formatterReader = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
 
         @Override
-        public void write(final JsonWriter jsonWriter, final LocalDate localDate) throws IOException {
-            jsonWriter.value(localDate.format(formatterWriter));
+        public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {
+            jsonWriter.value(localDateTime.format(formatterWriter));
         }
 
         @Override
-        public LocalDate read(final JsonReader jsonReader) throws IOException {
-            return LocalDate.parse(jsonReader.nextString(), formatterReader);
+        public LocalDateTime read(final JsonReader jsonReader) throws IOException {
+            return LocalDateTime.parse(jsonReader.nextString(), formatterReader);
         }
     }
+
     HttpTaskManager manager;
     HttpClient client;
     HttpResponse.BodyHandler<String> handler;
@@ -62,9 +61,7 @@ class HttpTaskManagerTest {
         urlEpic = URI.create("http://localhost:8078/load/epic");
         urlSub = URI.create("http://localhost:8078/load/subtask");
         urlHistory = URI.create("http://localhost:8078/load/history");
-        client = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(5))
-                .build();
+        client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
     }
 
     @AfterEach
@@ -83,26 +80,10 @@ class HttpTaskManagerTest {
         manager.getSubtaskId(sub.getId());
         manager.getHistory();
 
-        HttpResponse<String> responseTask = client.send(HttpRequest.newBuilder()
-                .GET()
-                .uri(urlTask)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build(), handler);
-        HttpResponse<String> responseEpic = client.send(HttpRequest.newBuilder()
-                .GET()
-                .uri(urlEpic)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build(), handler);
-        HttpResponse<String> responseSub = client.send(HttpRequest.newBuilder()
-                .GET()
-                .uri(urlSub)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build(), handler);
-        HttpResponse<String> responseHistory = client.send(HttpRequest.newBuilder()
-                .GET()
-                .uri(urlHistory)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build(), handler);
+        HttpResponse<String> responseTask = client.send(HttpRequest.newBuilder().GET().uri(urlTask).version(HttpClient.Version.HTTP_1_1).build(), handler);
+        HttpResponse<String> responseEpic = client.send(HttpRequest.newBuilder().GET().uri(urlEpic).version(HttpClient.Version.HTTP_1_1).build(), handler);
+        HttpResponse<String> responseSub = client.send(HttpRequest.newBuilder().GET().uri(urlSub).version(HttpClient.Version.HTTP_1_1).build(), handler);
+        HttpResponse<String> responseHistory = client.send(HttpRequest.newBuilder().GET().uri(urlHistory).version(HttpClient.Version.HTTP_1_1).build(), handler);
 
         assertEquals(gson.toJson(manager.getTask()), responseTask.body());
         assertEquals(gson.toJson(manager.getEpic()), responseEpic.body());
@@ -113,26 +94,10 @@ class HttpTaskManagerTest {
     //Пустой список задач.
     @Test
     public void saveAndLoadEmptyTest() throws IOException, InterruptedException {
-        HttpResponse<String> responseTask = client.send(HttpRequest.newBuilder()
-                .GET()
-                .uri(urlTask)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build(), handler);
-        HttpResponse<String> responseEpic = client.send(HttpRequest.newBuilder()
-                .GET()
-                .uri(urlEpic)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build(), handler);
-        HttpResponse<String> responseSub = client.send(HttpRequest.newBuilder()
-                .GET()
-                .uri(urlSub)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build(), handler);
-        HttpResponse<String> responseHistory = client.send(HttpRequest.newBuilder()
-                .GET()
-                .uri(urlHistory)
-                .version(HttpClient.Version.HTTP_1_1)
-                .build(), handler);
+        HttpResponse<String> responseTask = client.send(HttpRequest.newBuilder().GET().uri(urlTask).version(HttpClient.Version.HTTP_1_1).build(), handler);
+        HttpResponse<String> responseEpic = client.send(HttpRequest.newBuilder().GET().uri(urlEpic).version(HttpClient.Version.HTTP_1_1).build(), handler);
+        HttpResponse<String> responseSub = client.send(HttpRequest.newBuilder().GET().uri(urlSub).version(HttpClient.Version.HTTP_1_1).build(), handler);
+        HttpResponse<String> responseHistory = client.send(HttpRequest.newBuilder().GET().uri(urlHistory).version(HttpClient.Version.HTTP_1_1).build(), handler);
 
         assertEquals("Значние key: task не найдено.", responseTask.body());
         assertEquals("Значние key: epic не найдено.", responseEpic.body());
