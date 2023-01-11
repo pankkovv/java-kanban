@@ -13,7 +13,7 @@ import org.junit.jupiter.api.function.Executable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public abstract class TaskManagerTest<T extends TaskManager> {
+public class TaskManagerTest<T extends TaskManager> {
 
     TaskManager manager = (T) new FileBackedTasksManager();
 
@@ -244,7 +244,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
             @Override
             public void execute() {
-                Task task1=  manager.createTask("sdfdsfg", "dfgfdg", "NEW");
+                Task task1 = manager.createTask("sdfdsfg", "dfgfdg", "NEW");
             }
         });
         assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
@@ -257,7 +257,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
             @Override
             public void execute() {
-                Subtask subtask1=  manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "DONE");
+                Subtask subtask1 = manager.createSubtask(epic.getId(), "sdfsdfs", "fdsfsdf", "DONE");
             }
         });
         assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
@@ -270,7 +270,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final InMemoryTaskManager.ValidationTaskException exception = assertThrows(InMemoryTaskManager.ValidationTaskException.class, new Executable() {
             @Override
             public void execute() {
-                manager.updateTask(task.getId(), "sdfsdfdfgfdfs", "fdsfdfgdfgsdf", "NEW");;
+                manager.updateTask(task.getId(), "sdfsdfdfgfdfs", "fdsfdfgdfgsdf", "NEW");
+                ;
             }
         });
         assertEquals("Нельзя выполнять сразу несколько задач.", exception.getMessage());
@@ -1055,7 +1056,5 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         assertEquals(List.of(), manager.getHistory(), "История записана не верно.");
     }
-
-
 }
 
