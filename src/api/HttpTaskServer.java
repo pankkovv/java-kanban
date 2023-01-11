@@ -12,6 +12,7 @@ import manager.HttpTaskManager;
 import manager.InMemoryTaskManager;
 import manager.Managers;
 import model.Endpoint;
+import model.Epic;
 import model.Subtask;
 import model.Task;
 
@@ -20,7 +21,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -29,14 +29,32 @@ import static jdk.internal.util.xml.XMLStreamWriter.DEFAULT_CHARSET;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
-    Gson gson = new Gson();
+
+    Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter())
+            .create();
+
+    public class LocalDateAdapter extends TypeAdapter<LocalDateTime> {
+        private final DateTimeFormatter formatterWriter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+        private final DateTimeFormatter formatterReader = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+
+        @Override
+        public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {
+            jsonWriter.value(localDateTime.format(formatterWriter));
+        }
+
+        @Override
+        public LocalDateTime read(final JsonReader jsonReader) throws IOException {
+            return LocalDateTime.parse(jsonReader.nextString(), formatterReader);
+        }
+    }
+
     private static HttpTaskManager manager;
-    public HttpServer server;
+    public static HttpServer server;
 
     public HttpTaskServer() throws IOException, InterruptedException {
         manager = Managers.getHttpDefault("http://localhost:8078");
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
-        server.createContext("/save", new MethodHandler());
         server.createContext("/load", new MethodHandler());
         server.createContext("/tasks", new MethodHandler());
         server.createContext("/tasks/task", new MethodHandler());
@@ -45,7 +63,7 @@ public class HttpTaskServer {
         server.createContext("/tasks/task/?id=", new MethodHandler());
         server.createContext("/tasks/epic/?id=", new MethodHandler());
         server.createContext("/tasks/subtask/?id=", new MethodHandler());
-        server.createContext("/tasks/subtask/epic/?id=", new MethodHandler());
+        server.createContext("/tasks/allsubepic/?id=", new MethodHandler());
         server.createContext("/tasks/history", new MethodHandler());
         server.createContext("/tasks/uptask/?id=", new MethodHandler());
         server.createContext("/tasks/upepic/?id=", new MethodHandler());
@@ -142,10 +160,6 @@ public class HttpTaskServer {
                     removeSubIdHandler(exchange);
                     break;
 
-                case SAVE:
-                    save(exchange);
-                    break;
-
                 case LOAD:
                     try {
                         load(exchange);
@@ -192,13 +206,14 @@ public class HttpTaskServer {
                     if (pathParts[2].equals("subtask")) {
                         return Endpoint.GET_SUBID;
                     }
+                    if (pathParts[2].equals("allsubepic")) {
+                        return Endpoint.GET_ALLSUBEPIC;
+                    }
                 }
                 break;
 
             case "POST":
-                if (pathParts.length == 2 && pathParts[1].equals("save")) {
-                    return Endpoint.SAVE;
-                } else if (pathParts.length == 3 && pathParts[1].equals("tasks")) {
+                if (pathParts.length == 3 && pathParts[1].equals("tasks")) {
                     if (pathParts[2].equals("task")) {
                         return Endpoint.POST_TASK;
                     }
@@ -258,6 +273,10 @@ public class HttpTaskServer {
         server.start();
     }
 
+    public static void stop() {
+        server.stop(1 / 10000);
+    }
+
     private void writeResponse(HttpExchange exchange, String responseString, int responseCode) throws IOException {
         try {
             if (responseString.isBlank()) {
@@ -309,15 +328,15 @@ public class HttpTaskServer {
     }
 
     private void load(HttpExchange httpExchange) throws IOException, InterruptedException {
-        try{
+        try {
             String key = httpExchange.getRequestURI().getPath().substring("/load/".length());
             String response = manager.loadKV(key);
-            if(httpExchange.getResponseCode() == 200){
+            if (httpExchange.getResponseCode() == 200) {
                 httpExchange.sendResponseHeaders(200, 0);
                 try (OutputStream os = httpExchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
-            } else if (response.equals("Key для сохранения пустой. key указывается в пути: /load/{key}")){
+            } else if (response.equals("Key для сохранения пустой. key указывается в пути: /load/{key}")) {
                 httpExchange.sendResponseHeaders(400, 0);
                 try (OutputStream os = httpExchange.getResponseBody()) {
                     os.write(response.getBytes());
@@ -329,19 +348,6 @@ public class HttpTaskServer {
                 }
             }
 
-        } finally {
-            httpExchange.close();
-        }
-    }
-
-    private void save(HttpExchange httpExchange) throws IOException {
-        try {
-            manager.saveKV();
-            String response = "Данные сохранены!";
-            httpExchange.sendResponseHeaders(404, 0);
-            try (OutputStream os = httpExchange.getResponseBody()) {
-                os.write(response.getBytes());
-            }
         } finally {
             httpExchange.close();
         }
@@ -488,7 +494,7 @@ public class HttpTaskServer {
                 Task task = manager.createTask(newTask[0], newTask[1], newTask[2]);
                 task.setStartTime(LocalDateTime.parse(newTask[3], formatter));
                 task.setDuration(Duration.parse(newTask[4]));
-                task.setStartTime(LocalDateTime.parse(newTask[5], formatter));
+                task.setEndTime(LocalDateTime.parse(newTask[5], formatter));
                 String response = gson.toJson(task);
                 try (OutputStream os = httpExchange.getResponseBody()) {
                     os.write("Задача создана:\n".getBytes());
@@ -510,7 +516,12 @@ public class HttpTaskServer {
         if (!newTask[0].equals("null") && !newTask[1].equals("null") && !newTask[2].equals("null")) {
             httpExchange.sendResponseHeaders(200, 0);
             try {
-                String response = gson.toJson(manager.createEpic(newTask[0], newTask[1], newTask[2]));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+                Epic epic = manager.createEpic(newTask[0], newTask[1], newTask[2]);
+                epic.setStartTime(LocalDateTime.parse(newTask[3], formatter));
+                epic.setDuration(Duration.parse(newTask[4]));
+                epic.setEndTime(LocalDateTime.parse(newTask[5], formatter));
+                String response = gson.toJson(epic);
                 try (OutputStream os = httpExchange.getResponseBody()) {
                     os.write("Задача создана:\n".getBytes());
                     os.write(response.getBytes());
@@ -536,7 +547,12 @@ public class HttpTaskServer {
         if (!newTask[0].equals("null") && !newTask[1].equals("null") && !newTask[2].equals("null")) {
             httpExchange.sendResponseHeaders(200, 0);
             try {
-                String response = gson.toJson(manager.createSubtask(idOpt.get(), newTask[0], newTask[1], newTask[2]));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+                Subtask subtask = manager.createSubtask(idOpt.get(), newTask[0], newTask[1], newTask[2]);
+                subtask.setStartTime(LocalDateTime.parse(newTask[3], formatter));
+                subtask.setDuration(Duration.parse(newTask[4]));
+                subtask.setEndTime(LocalDateTime.parse(newTask[5], formatter));
+                String response = gson.toJson(subtask);
                 try (OutputStream os = httpExchange.getResponseBody()) {
                     os.write("Подзадача создана:\n".getBytes());
                     os.write(response.getBytes());
@@ -560,16 +576,24 @@ public class HttpTaskServer {
             return;
         }
         String[] newTask = getInfoTask(httpExchange);
-        if (!newTask[0].equals("null") && !newTask[1].equals("null") && !newTask[2].equals("null")) {
-            httpExchange.sendResponseHeaders(200, 0);
-            manager.updateTask(idOpt.get(), newTask[0], newTask[1], newTask[2]);
-            String response = gson.toJson(manager.getTaskId(idOpt.get()));
-            try (OutputStream os = httpExchange.getResponseBody()) {
-                os.write("Задача обновлена:\n".getBytes());
-                os.write(response.getBytes());
+        if (manager.getTaskId(idOpt.get()) != null) {
+            if (!newTask[0].equals("null") && !newTask[1].equals("null") && !newTask[2].equals("null")) {
+                httpExchange.sendResponseHeaders(200, 0);
+                manager.updateTask(idOpt.get(), newTask[0], newTask[1], newTask[2]);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+                manager.getTaskId(idOpt.get()).setStartTime(LocalDateTime.parse(newTask[3], formatter));
+                manager.getTaskId(idOpt.get()).setDuration(Duration.parse(newTask[4]));
+                manager.getTaskId(idOpt.get()).setEndTime(LocalDateTime.parse(newTask[5], formatter));
+                String response = gson.toJson(manager.getTaskId(idOpt.get()));
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write("Задача обновлена:\n".getBytes());
+                    os.write(response.getBytes());
+                }
+            } else {
+                writeResponse(httpExchange, "Поля задачи не могут быть пустыми.", 400);
             }
         } else {
-            writeResponse(httpExchange, "Поля задачи не могут быть пустыми.", 400);
+            writeResponse(httpExchange, "Задача с идентификатором " + idOpt.get() + " не найдена.", 404);
         }
         httpExchange.close();
     }
@@ -581,16 +605,23 @@ public class HttpTaskServer {
             return;
         }
         String[] newTask = getInfoTask(httpExchange);
-        if (!newTask[0].equals("null") && !newTask[1].equals("null")) {
-            httpExchange.sendResponseHeaders(200, 0);
-            manager.updateEpic(idOpt.get(), newTask[0], newTask[1]);
-            String response = gson.toJson(manager.getEpicId(idOpt.get()));
-            try (OutputStream os = httpExchange.getResponseBody()) {
-                os.write("Задача обновлена:\n".getBytes());
-                os.write(response.getBytes());
+        if (manager.getEpicId(idOpt.get()) != null) {
+            if (!newTask[0].equals("null") && !newTask[1].equals("null")) {
+                httpExchange.sendResponseHeaders(200, 0);
+                manager.updateEpic(idOpt.get(), newTask[0], newTask[1]);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+                manager.getEpicId(idOpt.get()).setStartTime(LocalDateTime.parse(newTask[3], formatter));
+                manager.getEpicId(idOpt.get()).setDuration(Duration.parse(newTask[4]));
+                String response = gson.toJson(manager.getEpicId(idOpt.get()));
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write("Задача обновлена:\n".getBytes());
+                    os.write(response.getBytes());
+                }
+            } else {
+                writeResponse(httpExchange, "Поля задачи не могут быть пустыми.", 400);
             }
         } else {
-            writeResponse(httpExchange, "Поля задачи не могут быть пустыми.", 400);
+            writeResponse(httpExchange, "Задача с идентификатором " + idOpt.get() + " не найдена.", 404);
         }
         httpExchange.close();
     }
@@ -601,20 +632,28 @@ public class HttpTaskServer {
             writeResponse(httpExchange, "Некорректный идентификатор задачи", 400);
             return;
         }
-        String[] newId = idOpt.toString().split("");
+        String[] newId = idOpt.get().toString().split("");
         String[] newTask = getInfoTask(httpExchange);
-        Integer idEpic = Integer.parseInt(newId[0]);
-        Integer idSub = Integer.parseInt(newId[1]);
-        if (!newTask[0].equals("null") && !newTask[1].equals("null") && !newTask[2].equals("null")) {
-            httpExchange.sendResponseHeaders(200, 0);
-            manager.updateSubtask(idEpic, idSub, newTask[0], newTask[1], newTask[2]);
-            String response = gson.toJson(manager.getTaskId(idOpt.get()));
-            try (OutputStream os = httpExchange.getResponseBody()) {
-                os.write("Задача обновлена:\n".getBytes());
-                os.write(response.getBytes());
+        Integer idEpic = Integer.parseInt(newId[0] + newId[1] + newId[2]);
+        Integer idSub = Integer.parseInt(newId[3] + newId[4] + newId[5]);
+        if (manager.getSubtaskId(idSub) != null) {
+            if (!newTask[0].equals("null") && !newTask[1].equals("null") && !newTask[2].equals("null")) {
+                httpExchange.sendResponseHeaders(200, 0);
+                manager.updateSubtask(idEpic, idSub, newTask[0], newTask[1], newTask[2]);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd|HH:mm:ss");
+                manager.getSubtaskId(idSub).setStartTime(LocalDateTime.parse(newTask[3], formatter));
+                manager.getSubtaskId(idSub).setDuration(Duration.parse(newTask[4]));
+                manager.getSubtaskId(idSub).setEndTime(LocalDateTime.parse(newTask[5], formatter));
+                String response = gson.toJson(manager.getSubtaskId(idOpt.get()));
+                try (OutputStream os = httpExchange.getResponseBody()) {
+                    os.write("Задача обновлена:\n".getBytes());
+                    os.write(response.getBytes());
+                }
+            } else {
+                writeResponse(httpExchange, "Поля задачи не могут быть пустыми.", 400);
             }
         } else {
-            writeResponse(httpExchange, "Поля задачи не могут быть пустыми.", 400);
+            writeResponse(httpExchange, "Задача с идентификатором " + idSub + " не найдена.", 404);
         }
         httpExchange.close();
     }
@@ -674,6 +713,10 @@ public class HttpTaskServer {
             }
         }
         httpExchange.sendResponseHeaders(200, 0);
+        try (OutputStream os = httpExchange.getResponseBody()) {
+            os.write("Задача удалена.".getBytes());
+        }
+        httpExchange.sendResponseHeaders(200, 0);
         httpExchange.close();
     }
 
@@ -692,6 +735,10 @@ public class HttpTaskServer {
             }
         }
         httpExchange.sendResponseHeaders(200, 0);
+        try (OutputStream os = httpExchange.getResponseBody()) {
+            os.write("Задача удалена.".getBytes());
+        }
+        httpExchange.sendResponseHeaders(200, 0);
         httpExchange.close();
     }
 
@@ -708,6 +755,10 @@ public class HttpTaskServer {
                 writeResponse(httpExchange, "Ошибка удаления.", 400);
                 return;
             }
+        }
+        httpExchange.sendResponseHeaders(200, 0);
+        try (OutputStream os = httpExchange.getResponseBody()) {
+            os.write("Задача удалена.".getBytes());
         }
         httpExchange.sendResponseHeaders(200, 0);
         httpExchange.close();
