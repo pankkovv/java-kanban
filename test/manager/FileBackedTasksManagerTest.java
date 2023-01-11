@@ -7,6 +7,7 @@ import model.TypeTask;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
@@ -24,8 +25,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     void taskToStringTest() {
         Task task = manager.createTask("Задача", "Функция создания задачи", "NEW");
         String type = TypeTask.TASK.toString();
-        String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n" , task.getId(), type, task.getTitle(), task.getStatus(), task.getDescription(), task.getTitle(), task.getStartTime(), task.getDuration(), task.getEndTime());
-        String expectedString = "0,TASK,Задача,NEW,Функция создания задачи,Задача," + task.getStartTime() + "," + task.getDuration() + "," +  task.getEndTime() + "\r\n";
+        String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n", task.getId(), type, task.getTitle(), task.getStatus(), task.getDescription(), task.getTitle(), task.getStartTime(), task.getDuration(), task.getEndTime());
+        String expectedString = "0,TASK,Задача,NEW,Функция создания задачи,Задача," + task.getStartTime() + "," + task.getDuration() + "," + task.getEndTime() + "\r\n";
 
         assertEquals(expectedString, formatWrite, "Строки для записи неодинаковые.");
     }
@@ -35,7 +36,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         Epic epic = manager.createEpic("Задача", "Функция создания задачи", "NEW");
         String type = TypeTask.EPIC.toString();
         String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n", epic.getId(), type, epic.getTitle(), epic.getStatus(), epic.getDescription(), epic.getTitle(), epic.getStartTime(), epic.getDuration(), epic.getEndTime());
-        String expectedString = "100,EPIC,Задача,NEW,Функция создания задачи,Задача," + epic.getStartTime() + "," + epic.getDuration() + "," +  epic.getEndTime() + "\r\n";
+        String expectedString = "100,EPIC,Задача,NEW,Функция создания задачи,Задача," + epic.getStartTime() + "," + epic.getDuration() + "," + epic.getEndTime() + "\r\n";
 
         assertEquals(expectedString, formatWrite, "Строки для записи неодинаковые.");
     }
@@ -46,7 +47,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         Subtask subtask = manager.createSubtask(epic.getId(), "Задача", "Функция создания задачи", "NEW");
         String type = TypeTask.SUB.toString();
         String formatWrite = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s%n", subtask.getId(), type, subtask.getTitle(), subtask.getStatus(), subtask.getDescription(), subtask.getIdEpic(), subtask.getStartTime(), subtask.getDuration(), subtask.getEndTime());
-        String expectedString = "200,SUB,Задача,NEW,Функция создания задачи,100," + subtask.getStartTime() + "," + subtask.getDuration() + "," +  subtask.getEndTime() + "\r\n";
+        String expectedString = "200,SUB,Задача,NEW,Функция создания задачи,100," + subtask.getStartTime() + "," + subtask.getDuration() + "," + subtask.getEndTime() + "\r\n";
 
         assertEquals(expectedString, formatWrite, "Строки для записи неодинаковые.");
     }
@@ -353,8 +354,6 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
                 }
             }
         });
-
         assertEquals("For input string: \"SUB\"", exception.getMessage());
-
     }
 }
