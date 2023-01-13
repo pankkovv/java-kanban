@@ -39,11 +39,9 @@ public class HttpTaskManager extends FileBackedTasksManager {
         }
     }
 
-    private String url;
     private KVTaskClient client;
 
     public HttpTaskManager(String url) throws IOException, InterruptedException {
-        this.url = url;
         this.client = new KVTaskClient(url);
     }
 
@@ -132,24 +130,21 @@ public class HttpTaskManager extends FileBackedTasksManager {
     public void saveKV() {
         try {
             for (Task task : super.getTask()) {
-                KVTaskClient.put("task?id=" + task.getId(), gson.toJson(super.getTask()));
+                client.put("task?id=" + task.getId(), gson.toJson(super.getTask()));
             }
             for (Epic epic : super.getEpic()) {
-                KVTaskClient.put("epic?id=" + epic.getId(), gson.toJson(super.getEpic()));
+                client.put("epic?id=" + epic.getId(), gson.toJson(super.getEpic()));
             }
             for (Subtask subtask : super.getSubtask()) {
-                KVTaskClient.put("subtask?id=" + subtask.getId(), gson.toJson(super.getSubtask()));
+                client.put("subtask?id=" + subtask.getId(), gson.toJson(super.getSubtask()));
             }
-            KVTaskClient.put("history?", gson.toJson(super.getHistory()));
-        } catch (IOException e) {
+            client.put("history", gson.toJson(super.getHistory()));
+        } catch (IOException | InterruptedException e) {
             throw new FileBackedTasksManager.ManagerSaveException(e.getMessage());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 
     public String loadKV(String key) throws IOException, InterruptedException {
-        return KVTaskClient.load(key);
+        return client.load(key);
     }
-
 }
