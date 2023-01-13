@@ -37,7 +37,7 @@ public class KVTaskClient {
         return response.body();
     }
 
-    public static void put(String key, String json) throws IOException, InterruptedException {
+    public void put(String key, String json) throws IOException, InterruptedException {
         URI urlPut;
         if (key.endsWith("%3F")) {
             urlPut = URI.create(url + "/save/" + key + "&API_TOKEN=" + API_TOKEN);
@@ -52,7 +52,7 @@ public class KVTaskClient {
         HttpResponse<String> responsePut = client.send(requestPut, handler);
     }
 
-    public static String load(String key) throws IOException, InterruptedException {
+    public String load(String key) throws IOException, InterruptedException {
         URI urlPut;
         if (key.endsWith("%3F")) {
             urlPut = URI.create(url + "/load/" + key + "&API_TOKEN=" + API_TOKEN);
