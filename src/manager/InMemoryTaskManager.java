@@ -2,8 +2,6 @@ package manager;
 
 import model.*;
 
-import java.security.SignatureException;
-import java.time.LocalTime;
 import java.util.TreeSet;
 
 
@@ -15,7 +13,6 @@ public class InMemoryTaskManager implements TaskManager {
     public HistoryManager managerHistory = Managers.getDefaultHistory();
 
     Comparator<Task> comparator = (o1, o2) -> {
-
         if (o1.getStartTime() == null && o2.getStartTime() == null) {
             return Integer.compare(1, 0);
         } else if (o1.getStartTime() != null && o2.getStartTime() == null) {
@@ -69,7 +66,7 @@ public class InMemoryTaskManager implements TaskManager {
                 System.out.println("У данной epic-задачи отсутствуют подзадачи.");
             }
         }
-        return null;
+        return List.of();
     }
 
     @Override
@@ -146,7 +143,7 @@ public class InMemoryTaskManager implements TaskManager {
         task.setTitle(title);
         task.setDescription(description);
         task.setStatus(status);
-        if(!(status.equals(String.valueOf(StatusOfTask.NEW)) || status.equals(String.valueOf(StatusOfTask.IN_PROGRESS)) || status.equals(String.valueOf(StatusOfTask.DONE)))){
+        if (!(status.equals(String.valueOf(StatusOfTask.NEW)) || status.equals(String.valueOf(StatusOfTask.IN_PROGRESS)) || status.equals(String.valueOf(StatusOfTask.DONE)))) {
             throw new ValidationTaskException("Нельзя использовать статус:" + status);
         }
         task.setId(generatorId(TypeTask.TASK.toString()));
@@ -175,12 +172,12 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setTitle(title);
         epic.setDescription(description);
         epic.setStatus(status);
-        if(!(status.equals(String.valueOf(StatusOfTask.NEW)) || status.equals(String.valueOf(StatusOfTask.IN_PROGRESS)) || status.equals(String.valueOf(StatusOfTask.DONE)))){
+        if (!(status.equals(String.valueOf(StatusOfTask.NEW)) || status.equals(String.valueOf(StatusOfTask.IN_PROGRESS)) || status.equals(String.valueOf(StatusOfTask.DONE)))) {
             throw new ValidationTaskException("Нельзя использовать статус:" + status);
         }
         epic.setId(generatorId(TypeTask.EPIC.toString()));
         if (epic.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
-            if (epic.getListOfSubtasks().size() != 0) {
+            if (!epic.getListOfSubtasks().isEmpty()) {
                 LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
                 if (epic.getListOfSubtasks().size() != 0) {
                     for (Subtask subtask : epic.getListOfSubtasks()) {
@@ -197,7 +194,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setDuration(Duration.between(epic.getStartTime(), LocalDateTime.now()));
             epic.setEndTime(epic.getStartTime().plus(epic.getDuration()));
         } else {
-            if (epic.getListOfSubtasks().size() != 0) {
+            if (!epic.getListOfSubtasks().isEmpty()) {
                 LocalDateTime startTime = LocalDateTime.of(2000, 1, 1, 0, 0, 0);
                 for (Subtask subtask : epic.getListOfSubtasks()) {
                     if (subtask.getStartTime().isAfter(startTime)) {
@@ -221,7 +218,7 @@ public class InMemoryTaskManager implements TaskManager {
                 subtask.setTitle(title);
                 subtask.setDescription(description);
                 subtask.setStatus(status);
-                if(!(status.equals(String.valueOf(StatusOfTask.NEW)) || status.equals(String.valueOf(StatusOfTask.IN_PROGRESS)) || status.equals(String.valueOf(StatusOfTask.DONE)))){
+                if (!(status.equals(String.valueOf(StatusOfTask.NEW)) || status.equals(String.valueOf(StatusOfTask.IN_PROGRESS)) || status.equals(String.valueOf(StatusOfTask.DONE)))) {
                     throw new ValidationTaskException("Нельзя использовать статус:" + status);
                 }
                 subtask.setId(generatorId(TypeTask.SUB.toString()));
@@ -244,7 +241,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
                 epic.setListOfSubtasks(subtask);
                 generatorStatusEpic(idSearch);
-                if (epic.getListOfSubtasks().size() != 0) {
+                if (!epic.getListOfSubtasks().isEmpty()) {
                     LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
                     for (Subtask sub : epic.getListOfSubtasks()) {
                         if (sub.getStartTime().isBefore(startTime)) {
@@ -298,8 +295,8 @@ public class InMemoryTaskManager implements TaskManager {
                 generatorStatusEpic(idSearch);
                 if (epic.getStatus().equals(String.valueOf(StatusOfTask.DONE))) {
                     LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
-                    Duration duration = Duration.ofSeconds(0,0);
-                    if (epic.getListOfSubtasks().size() != 0) {
+                    Duration duration = Duration.ofSeconds(0, 0);
+                    if (!epic.getListOfSubtasks().isEmpty()) {
                         for (Subtask subtask : epic.getListOfSubtasks()) {
                             if (subtask.getStartTime().isBefore(startTime)) {
                                 startTime = subtask.getStartTime();
@@ -309,7 +306,7 @@ public class InMemoryTaskManager implements TaskManager {
                         getEndTimeEpic(epic.getId());
                     }
                 } else {
-                    if (epic.getListOfSubtasks().size() != 0) {
+                    if (!epic.getListOfSubtasks().isEmpty()) {
                         LocalDateTime startTime = LocalDateTime.of(3000, 1, 1, 0, 0, 0);
                         for (Subtask subtask : epic.getListOfSubtasks()) {
                             if (subtask.getStartTime().isBefore(startTime)) {
@@ -376,7 +373,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpicId(int idSearch) {
         for (Epic epic : listEpic) {
             if (epic.getId() == idSearch) {
-                if (epic.getListOfSubtasks().size() != 0) {
+                if (!epic.getListOfSubtasks().isEmpty()) {
                     for (Subtask subtask : epic.getListOfSubtasks()) {
                         managerHistory.remove(subtask.getId());
                         listSubtask.remove(subtask);
@@ -499,7 +496,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
 
                 if (conditionOne == -listTypeStatus.size()) {
-                    if (epic.getListOfSubtasks().size() != 0) {
+                    if (!epic.getListOfSubtasks().isEmpty()) {
                         epic.setEndTime(startTime.plus(epic.getDuration()));
                     }
                 } else {
@@ -516,9 +513,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public static class ValidationTaskException extends RuntimeException {
-        public ValidationTaskException() {
-        }
-
         public ValidationTaskException(final String message) {
             super(message);
         }
