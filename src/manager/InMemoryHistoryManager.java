@@ -10,10 +10,9 @@ public class InMemoryHistoryManager implements HistoryManager {
     Map<Integer, Node> mapHistory = new HashMap<>();
     CustomLinkedList<Task> linkedListHistory = new CustomLinkedList<>();
 
-
     @Override
-    public void add(Task task){
-        if(mapHistory.containsKey(task.getId())){
+    public void add(Task task) {
+        if (mapHistory.containsKey(task.getId())) {
             linkedListHistory.removeNode(mapHistory.get(task.getId()));
             mapHistory.remove(task.getId());
         }
@@ -22,8 +21,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public List<Task> getHistory(){
-        if(linkedListHistory.getSize() != 0) {
+    public List<Task> getHistory() {
+        if (linkedListHistory.getSize() != 0) {
             listHistory = linkedListHistory.getTasks();
             return listHistory;
         }
@@ -31,12 +30,11 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public void remove(int id){
-        if(mapHistory.containsKey(id)) {
+    public void remove(int id) {
+        if (mapHistory.containsKey(id)) {
             linkedListHistory.removeNode(mapHistory.get(id));
         }
     }
-
 
     class CustomLinkedList<Task> {
         private Node<Task> head;
@@ -45,19 +43,20 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         private int size = 0;
 
-        void linkLast(Task task){
+        void linkLast(Task task) {
             // Реализуйте метод
             final Node<Task> oldTail = tail;
-            final Node<Task> newNode= new Node<>(task, null ,oldTail);
+            final Node<Task> newNode = new Node<>(task, null, oldTail);
             tail = newNode;
 
-            if(oldTail == null)
+            if (oldTail == null)
                 head = newNode;
             else
                 oldTail.next = newNode;
             size++;
         }
-        List<Task> getTasks(){
+
+        List<Task> getTasks() {
             List<Task> newListHistory = new ArrayList<>();
             for (Node<Task> x = head; x != null; x = x.next) {
                 newListHistory.add(x.data);
@@ -65,8 +64,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             return newListHistory;
         }
 
-        void removeNode(Node<Task> x){
-            final Task element = x.data;
+        void removeNode(Node<Task> x) {
             final Node<Task> next = x.next;
             final Node<Task> prev = x.prev;
 
@@ -86,12 +84,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
             x.data = null;
             size--;
-
         }
 
-        int getSize(){
+        int getSize() {
             return size;
         }
-
     }
 }
