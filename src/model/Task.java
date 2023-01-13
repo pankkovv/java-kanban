@@ -3,21 +3,15 @@ package model;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.Objects;
 
 public class Task {
     protected String title;
     protected String description;
-
     protected Integer id;
-
     protected String status;
-
     protected LocalDateTime startTime;
-
     protected Duration duration;
-
     protected LocalDateTime endTime;
 
     @Override
@@ -40,15 +34,13 @@ public class Task {
                 "}";
     }
 
-
-        public boolean equals(Task task) {
+    public boolean equals(Task task) {
         if (this == task) return true;
         if (task == null || getClass() != task.getClass()) return false;
-
         Task taskNew = (Task) task;
-
-        return  (id == taskNew.id) && Objects.equals(title, taskNew.title) && Objects.equals(description, taskNew.description) && Objects.equals(status, taskNew.status);
+        return (id == taskNew.id) && Objects.equals(title, taskNew.title) && Objects.equals(description, taskNew.description) && Objects.equals(status, taskNew.status);
     }
+
     @Override
     public int hashCode() {
         int result = Objects.hash(title, description, id);
