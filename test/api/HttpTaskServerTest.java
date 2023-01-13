@@ -577,7 +577,7 @@ class HttpTaskServerTest {
                 .version(HttpClient.Version.HTTP_1_1)
                 .build(), handler);
 
-        assertEquals("Подзадачи epic с идентификатором 100 не найдена", responseAllSubGet.body());
+        assertEquals("[]", responseAllSubGet.body());
     }
 
     @Test
@@ -851,7 +851,7 @@ class HttpTaskServerTest {
                 .version(HttpClient.Version.HTTP_1_1)
                 .build(), handler);
 
-        assertEquals("Подзадачи epic с идентификатором 101 не найдена", responseAllSubGet.body());
+        assertEquals("[]", responseAllSubGet.body());
     }
 
     @Test
