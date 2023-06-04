@@ -33,7 +33,7 @@ Epic:
 
 Subtask:
 1. Создание новой подзадачи: POST http://localhost:8078/tasks/subtask, в Request Body json с данными задачи.
-2. Обновление подзадачи: POST http://localhost:8078/tasks/upsubtaskc?id=, в Request Body json с данными задачи.
+2. Обновление подзадачи: POST http://localhost:8078/tasks/upsubtask?id=, в Request Body json с данными задачи.
 3. Удаление подзадачи по id: DELETE http://localhost:8078/tasks/subtask?id=.
 4. Получение подзадачи по id: GET http://localhost:8078/tasks/subtask?id=.
 
