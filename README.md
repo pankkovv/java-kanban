@@ -42,7 +42,7 @@ History:
 
 Load:
 1. Чтение данных из бэкап файла: GET http://localhost:8078/load
-
+----
 Приложение написано на Java и протестировано с помощью JUnit. Пример кода:
 ```java
 class MethodHandler implements HttpHandler {
