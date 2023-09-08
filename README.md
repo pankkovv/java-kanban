@@ -41,7 +41,7 @@ Load:
 1. Чтение данных из бэкап файла: GET http://localhost:8078/load
 
 ## Стек
-- Java SE 11
+- JDK 11
 - HttpServer
 - REST API
 - JUnit
